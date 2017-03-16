@@ -353,8 +353,8 @@ data</panel_attributes>
     </coordinates>
     <panel_attributes>Model_Data
 --
-_data,label,parent_
-
+data,label,parent 
+(UNIQUE)
 bg=gray
 </panel_attributes>
     <additional_attributes/>
