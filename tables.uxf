@@ -298,7 +298,7 @@ fg=red
 m1=0..1
 m2=*
 model_id 
-model_log</panel_attributes>
+</panel_attributes>
     <additional_attributes>180.0;10.0;180.0;50.0;10.0;50.0;10.0;10.0</additional_attributes>
   </element>
   <element>
