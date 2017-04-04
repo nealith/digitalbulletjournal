@@ -16,11 +16,12 @@
 -- List of application's Users
 DROP TABLE IF EXISTS `Users`;
 CREATE TABLE Users(
-    e_mail VARCHAR(50),
+    id SERIAL AUTO_INCREMENT,
     password VARCHAR(64) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     nickname VARCHAR(50),
+    e_mail VARCHAR(50) UNIQUE,
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT users_pk PRIMARY KEY (id),
 );
