@@ -20,9 +20,9 @@ CREATE TABLE Users(
     password VARCHAR(64) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
-    nickname VARCHAR(50),
+    nick_name VARCHAR(50),
+    creation_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
     e_mail VARCHAR(50) UNIQUE,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT users_pk PRIMARY KEY (id),
 );
 
@@ -32,7 +32,7 @@ CREATE TABLE Users(
 DROP TABLE IF EXISTS `Logs`;
 CREATE TABLE Logs(
     id SERIAL AUTO_INCREMENT,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    creation_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
     owner VARCHAR(64) NOT NULL,
     privacy BOOLEAN NOT NULL,
     title VARCHAR(50) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE Logs_Users(
     id_log SERIAL NOT NULL,
     writting_rights BOOLEAN NOT NULL,
     admin_rights BOOLEAN NOT NULL,
-    adding_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    adding_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
     CONSTRAINT logs_users_pk PRIMARY KEY (id_log,id_user),
     CONSTRAINT logs_user_id_fk FOREIGN KEY (id_user) REFERENCES Users(id),
     CONSTRAINT logs_log_id_fk FOREIGN KEY (id_log) REFERENCES Logs(id)
@@ -72,7 +72,7 @@ CREATE TABLE Data(
     id VARCHAR(64),
     topic SERIAL NOT NULL,
     user VARCHAR(64) NOT NULL,
-    log_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    log_datetime TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
     CONSTRAINT data_pk PRIMARY KEY (id),
     CONSTRAINT data_fk FOREIGN KEY (topic_id) REFERENCES Topics(id)
 );
