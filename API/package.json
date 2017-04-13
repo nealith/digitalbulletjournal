@@ -1,0 +1,16 @@
+{
+  "name": "digital_bullet_journal_api",
+  "version": "0.0.1",
+  "description": "",
+  "repository": "",
+  "license": "MIT",
+  "dependencies": {
+    "sqlite3": "^3.1.8",
+    "socket.io": "^1.0.0",
+    "async": "^1.5.0",
+    "shasum": "^1.0.2"
+  },
+  "scripts": {
+  	"start": "node ./dbjserver.js"
+  }
+}
