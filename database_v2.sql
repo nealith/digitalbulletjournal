@@ -45,8 +45,8 @@ CREATE TABLE Logs(
 
 DROP TABLE IF EXISTS `Logs_Users`;
 CREATE TABLE Logs_Users(
-    id_user SERIAL NOT NULL,
-    id_log SERIAL NOT NULL,
+    user SERIAL NOT NULL,
+    log SERIAL NOT NULL,
     writting_rights BOOLEAN NOT NULL,
     admin_rights BOOLEAN NOT NULL,
     adding_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
