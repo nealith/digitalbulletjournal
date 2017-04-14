@@ -104,8 +104,8 @@ SELECT title FROM Topics WHERE user=? AND log=?;
 
 
 -- Créer une donnée
-INSERT INTO Data (id,log_datetime)
-VALUES (?,?);
+INSERT INTO Data (id,log_datetime,topic,user)
+VALUES (?,?,?,?);
 -- Supprimer une donnée
 DELETE FROM Data WHERE id=?;
 
