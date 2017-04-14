@@ -58,13 +58,13 @@ bg=gray</panel_attributes>
     <coordinates>
       <x>369</x>
       <y>72</y>
-      <w>72</w>
+      <w>54</w>
       <h>99</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 m1=1
 m2=*
-id_user</panel_attributes>
+user</panel_attributes>
     <additional_attributes>10.0;90.0;10.0;10.0</additional_attributes>
   </element>
   <element>
@@ -78,7 +78,7 @@ id_user</panel_attributes>
     <panel_attributes>lt=&lt;-
 m1=1
 m2=*
-id_log</panel_attributes>
+log</panel_attributes>
     <additional_attributes>100.0;90.0;100.0;50.0;10.0;50.0;10.0;10.0</additional_attributes>
   </element>
   <element>
