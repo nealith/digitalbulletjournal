@@ -19,6 +19,48 @@ var DBJ_DATA = function(){
     this.complexe = new Object();
     this.model = new Object();
 
+    // get all of topic
+    this.get_aot = function(obj,callback){
+
+        if (this.utils.check.id(obj)) {
+
+        } else {
+            callback('err::get_aot::obj not a id ',null);
+        }
+
+    }
+
+    // get all of log
+    this.get_aol = function(obj,callback){
+
+        if (this.utils.check.id(obj)) {
+
+        } else {
+            callback('err::get_aol::obj not a id ',null);
+        }
+
+    }
+
+    // get all of user
+    this.get_aou = function(obj,callback){
+
+        if (this.utils.check.id(obj)) {
+
+        } else {
+            callback('err::get_aou::obj not a id ',null);
+        }
+
+    }
+
+    // interne use
+    // get all of user and a log
+    this.get_aou = function(obj,callback){
+
+    }
+
+
+
+
     //==========================================================================
     //
     // DATA..TEXT
