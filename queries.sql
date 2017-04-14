@@ -4,7 +4,7 @@ INSERT INTO Users (id,password,first_name,last_name,nick_name,creation_date,e_ma
 VALUES (?,?,?,?,?,?,?); -- id,password,first_name,last_name,nick_name,creation_date,e_mail
 
 -- Supprimer un utilisateur
-DELETE FROM Logs WHERE id=?;
+DELETE FROM Users WHERE id=?;
 
 -- Modifier un utilisateur
 --  Changer l'e-mail
@@ -27,6 +27,10 @@ UPDATE Users SET first_name=? WHERE id=?;
 
 UPDATE Users SET nick_name=? WHERE id=?;
 
+-- Accèder à utilisateur
+
+SELECT * FROM Users WHERE id=?;
+
 
 -- Créer un journal
 
@@ -46,6 +50,10 @@ UPDATE Logs SET title=? WHERE id=?;
 
 UPDATE Logs SET privacy=? WHERE id=?;
 
+-- Accèder à un journal
+
+SELECT * FROM Logs WHERE id=?;
+
 -- Trigger : titre unique pour l'utilisateur --> laisser à l'api
 
 SELECT title FROM Logs WHERE owner=? AND title=?;
@@ -62,7 +70,11 @@ DELETE FROM Topics WHERE id=?;
 -- Modifier un topic
 --  Changer le titre
 
-UPDATE Logs SET title=? WHERE id=?;
+UPDATE Topics SET title=? WHERE id=?;
+
+-- Accèder à un topic
+
+SELECT * FROM Topics WHERE id=?;
 
 -- Trigger : titre unique pour le journal --> laisser à l'api
 
@@ -70,21 +82,25 @@ SELECT title FROM Topics WHERE log=? AND title=?;
 
 -- Partager un journal avec un utilisateur
 
-INSERT INTO Logs_Users (id_user, id_log, writting_rights, admin_rights, adding_date)
+INSERT INTO Logs_Users (user, log, writting_rights, admin_rights, adding_date)
 VALUES (?,?,?,?,?);
 
 -- Modifier les droits de partages
 --  Changer le droit d'administration
 
-UPDATE Logs_Users SET writting_rights=? WHERE id_user=? AND id_log=?;
+UPDATE Logs_Users SET writting_rights=? WHERE user=? AND log=?;
 
 --  Changer le droit d'écriture
 
-UPDATE Logs_Users SET admin_rights=? WHERE id_user=? AND id_log=?;
+UPDATE Logs_Users SET admin_rights=? WHERE user=? AND log=?;
 
 -- Retirer un utilisateur d'un journal
 
-DELETE FROM Logs_Users WHERE id_user=? , id_log=?;
+DELETE FROM Logs_Users WHERE user=? AND log=?;
+
+-- Accèder aux droits de partages
+
+SELECT title FROM Topics WHERE user=? AND log=?;
 
 
 -- Créer une donnée
