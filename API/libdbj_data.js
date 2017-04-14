@@ -11,11 +11,13 @@ var DBJ_DATA = function(){
     fs = require('fs');
     this.queries = JSON.parse(fs.readFileSync('queries_data.json', 'utf8'));
 
-
-    this.create = new Object();
-    this.update = new Object();
-    this.delete = new Object();
-    this.get = new Object();
+    this.text = new Object();
+    this.date = new Object();
+    this.boolean = new Object();
+    this.number = new Object();
+    this.link = new Object();
+    this.complexe = new Object();
+    this.model = new Object();
 
     //==========================================================================
     //
@@ -23,35 +25,35 @@ var DBJ_DATA = function(){
     //
     //==========================================================================
 
-    this.create.text = function(obj,callback){
+    this.text.create = function(obj,callback){
         if (this.utils.check.text(obj)) {
 
         } else {
-            callback('err::create.text::obj not a text ',null);
+            callback('err::text.create::obj not a text ',null);
         }
     }
 
-    this.update.text = function(obj,callback){
+    this.text.update = function(obj,callback){
         if (this.utils.check.text(obj)) {
 
         } else {
-            callback('err::update.text::obj not a text ',null);
+            callback('err::text.update::obj not a text ',null);
         }
     }
 
-    this.delete.text = function(obj,callback){
+    this.text.delete = function(obj,callback){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.text::obj not a id ',null);
+            callback('err::text.delete::obj not a id ',null);
         }
     }
 
-    this.get.text = function(obj,callback){
+    this.text.get = function(obj,callback){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.text::obj not a id ',null);
+            callback('err::text.get::obj not a id ',null);
         }
     }
 
@@ -61,35 +63,35 @@ var DBJ_DATA = function(){
     //
     //==========================================================================
 
-    this.create.date = function(obj,callback){
+    this.date.create = function(obj,callback){
         if (this.utils.check.date(obj)) {
 
         } else {
-            callback('err::create.date::obj not a date ',null);
+            callback('err::date.create::obj not a date ',null);
         }
     }
 
-    this.update.date = function(obj,callback){
+    this.date.update = function(obj,callback){
         if (this.utils.check.date(obj)) {
 
         } else {
-            callback('err::update.date::obj not a date ',null);
+            callback('err::date.update::obj not a date ',null);
         }
     }
 
-    this.delete.date = function(obj,callback){
+    this.date.delete = function(obj,callback){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.date::obj not a id ',null);
+            callback('err::date.delete::obj not a id ',null);
         }
     }
 
-    this.get.date = function(obj,callback){
+    this.date.get = function(obj,callback){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.date::obj not a id ',null);
+            callback('err::date.get::obj not a id ',null);
         }
     }
 
@@ -100,35 +102,35 @@ var DBJ_DATA = function(){
     //
     //==========================================================================
 
-    this.create.boolean = function(obj,callback){
+    this.boolean.create = function(obj,callback){
         if (this.utils.check.boolean(obj)) {
 
         } else {
-            callback('err::create.boolean::obj not a boolean ',null);
+            callback('err::boolean.create::obj not a boolean ',null);
         }
     }
 
-    this.update.boolean = function(obj,callback){
+    this.boolean.update = function(obj,callback){
         if (this.utils.check.boolean(obj)) {
 
         } else {
-            callback('err::update.boolean::obj not a boolean ',null);
+            callback('err::boolean.update::obj not a boolean ',null);
         }
     }
 
-    this.delete.boolean = function(obj,callback){
+    this.boolean.delete = function(obj,callback){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.boolean::obj not a id ',null);
+            callback('err::boolean.delete::obj not a id ',null);
         }
     }
 
-    this.get.boolean = function(obj,callback){
+    this.boolean.get = function(obj,callback){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.boolean::obj not a id ',null);
+            callback('err::boolean.get::obj not a id ',null);
         }
     }
 
@@ -138,35 +140,35 @@ var DBJ_DATA = function(){
     //
     //==========================================================================
 
-    this.create.number = function(obj,callback){
+    this.number.create = function(obj,callback){
         if (this.utils.check.number(obj)) {
 
         } else {
-            callback('err::create.number::obj not a number ',null);
+            callback('err::number.create::obj not a number ',null);
         }
     }
 
-    this.update.number = function(obj){
+    this.number.update = function(obj){
         if (this.utils.check.number(obj)) {
 
         } else {
-            callback('err::update.number::obj not a number ',null);
+            callback('err::number.update::obj not a number ',null);
         }
     }
 
-    this.delete.number = function(obj){
+    this.number.delete = function(obj){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.number::obj not a id ',null);
+            callback('err::number.delete::obj not a id ',null);
         }
     }
 
-    this.get.number = function(obj){
+    this.number.get = function(obj){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.number::obj not a id ',null);
+            callback('err::number.get::obj not a id ',null);
         }
     }
 
@@ -176,35 +178,35 @@ var DBJ_DATA = function(){
     //
     //==========================================================================
 
-    this.create.link = function(obj){
+    this.link.create = function(obj){
         if (this.utils.check.link(obj)) {
 
         } else {
-            callback('err::create.link::obj not a link ',null);
+            callback('err::link.create::obj not a link ',null);
         }
     }
 
-    this.update.link = function(obj){
+    this.link.update = function(obj){
         if (this.utils.check.link(obj)) {
 
         } else {
-            callback('err::update.link::obj not a link ',null);
+            callback('err::link.update::obj not a link ',null);
         }
     }
 
-    this.delete.link = function(obj){
+    this.link.delete = function(obj){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.link::obj not a id ',null);
+            callback('err::link.delete::obj not a id ',null);
         }
     }
 
-    this.get.link = function(obj){
+    this.link.get = function(obj){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.link::obj not a id ',null);
+            callback('err::link.get::obj not a id ',null);
         }
     }
 
@@ -214,35 +216,35 @@ var DBJ_DATA = function(){
     //
     //==========================================================================
 
-    this.create.complexe = function(obj){
+    this.complexe.create = function(obj){
         if (this.utils.check.complexe(obj)) {
 
         } else {
-            callback('err::create.complexe::obj not a complexe ',null);
+            callback('err::complexe.create::obj not a complexe ',null);
         }
     }
 
-    this.update.complexe = function(obj){
+    this.complexe.update = function(obj){
         if (this.utils.check.complexe(obj)) {
 
         } else {
-            callback('err::update.complexe::obj not a complexe ',null);
+            callback('err::complexe.update::obj not a complexe ',null);
         }
     }
 
-    this.delete.complexe = function(obj){
+    this.complexe.delete = function(obj){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.complexe::obj not a id ',null);
+            callback('err::complexe.delete::obj not a id ',null);
         }
     }
 
-    this.get.complexe = function(obj){
+    this.complexe.get = function(obj){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.complexe::obj not a id ',null);
+            callback('err::complexe.get::obj not a id ',null);
         }
     }
 
@@ -254,35 +256,35 @@ var DBJ_DATA = function(){
 
 
 
-    this.create.model = function(obj){
+    this.model.create = function(obj){
         if (this.utils.check.model(obj)) {
 
         } else {
-            callback('err::create.model::obj not a model ',null);
+            callback('err::model.create::obj not a model ',null);
         }
     }
 
-    this.update.model = function(obj){
+    this.model.update = function(obj){
         if (this.utils.check.model(obj)) {
 
         } else {
-            callback('err::update.model::obj not a model ',null);
+            callback('err::model.update::obj not a model ',null);
         }
     }
 
-    this.delete.model = function(obj){
+    this.model.delete = function(obj){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.model::obj not a id ',null);
+            callback('err::model.delete::obj not a id ',null);
         }
     }
 
-    this.get.model = function(obj){
+    this.model.get = function(obj){
         if (this.utils.check.id(obj)) {
 
         } else {
-            callback('err::update.model::obj not a id ',null);
+            callback('err::model.get::obj not a id ',null);
         }
     }
 
