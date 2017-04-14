@@ -6,7 +6,7 @@
 //==============================================================================
 //==============================================================================
 
-var utils = new function(){
+var DBJ_UTILS = new function(){
 
     this.check = new Object();
 
@@ -53,3 +53,5 @@ var utils = new function(){
     this.shasum = require('shasum');
 
 }
+
+module.exports = DBJ_UTILS;
