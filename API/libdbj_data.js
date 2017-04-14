@@ -1,4 +1,4 @@
-var data = function(){
+var DBJ_DATA = function(){
 
 
 
@@ -287,3 +287,4 @@ var data = function(){
     }
 
 }
+module.exports = DBJ_DATA;
