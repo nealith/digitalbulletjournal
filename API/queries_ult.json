@@ -1,0 +1,44 @@
+{
+    "users" : {
+        "add" : "INSERT INTO Users (id,password,first_name,last_name,nick_name,creation_date,e_mail)
+        VALUES (?,?,?,?,?,?,?);",
+        "update" : {
+            "e_mail" : "UPDATE Users SET e_mail=? WHERE id=?;",
+            "password" : "UPDATE Users SET password=? WHERE id=?;",
+            "last_name" : "UPDATE Users SET last_name=? WHERE id=?;",
+            "first_name" : "UPDATE Users SET first_name=? WHERE id=?;",
+            "nick_name" : "UPDATE Users SET nick_name=? WHERE id=?;"
+        },
+        "delete" : "DELETE FROM Users WHERE id=?;",
+        "get" : "SELECT * FROM Users WHERE id=?;"
+    },
+    "logs" : {
+        "add" : "INSERT INTO Logs (id,title,owner,creation_date,privacy)
+        VALUES (?,?,?,?,?);",
+        "update" : {
+            "title" : "UPDATE Logs SET title=? WHERE id=?;",
+            "privacy" : "UPDATE Logs SET privacy=? WHERE id=?;"
+        },
+        "delete" : "DELETE FROM Logs WHERE id=?;",
+        "get" : "SELECT * FROM Logs WHERE id=?;",
+        "title_already_exist" : "SELECT title FROM Logs WHERE owner=? AND title=?;"
+    },
+    "users_logs" : {
+        "share" : "INSERT INTO Logs_Users (user, log, writting_rights, admin_rights, adding_date)
+        VALUES (?,?,?,?,?);",
+        "unshare" : "DELETE FROM Logs_Users WHERE user=? AND log=?",
+        "update_share_settings" : {
+            "writting_rights" : "UPDATE Logs_Users SET writting_rights=? WHERE user=? AND log=?;",
+            "admin_rights" : "UPDATE Logs_Users SET admin_rights=? WHERE user=? AND log=?;"
+        },
+        "get_share_settings" : "SELECT title FROM Topics WHERE user=? AND log=?"
+    },
+    "topic" : {
+        "add" : "INSERT INTO Topics (id,title,log)
+        VALUES (?,?,?);",
+        "update" : "UPDATE Topics SET title=? WHERE id=?;",
+        "delete" : "DELETE FROM Topics WHERE id=?;",
+        "get" : "SELECT * FROM Topics WHERE id=?;",
+        "title_already_exist" : "SELECT title FROM Topics WHERE log=? AND title=?;"
+    }
+}
