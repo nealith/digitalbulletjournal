@@ -82,7 +82,7 @@ CREATE TABLE Data(
 
 DROP TABLE IF EXISTS `DataTexts`;
 CREATE TABLE DataTexts(
-    id SERIAL,
+    id VARCHAR(64),
     text VARCHAR(1000) NOT NULL,
     CONSTRAINT datatexts_pk PRIMARY KEY (id),
     CONSTRAINT datatexts_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -90,9 +90,9 @@ CREATE TABLE DataTexts(
 
 -- Every data_tables are children of Data
 
-DROP TABLE IF EXISTS `DataDate`;
-CREATE TABLE DataDate(
-    id SERIAL,
+DROP TABLE IF EXISTS `DataDates`;
+CREATE TABLE DataDates(
+    id VARCHAR(64),
     date DATE NOT NULL,
     CONSTRAINT datatexts_pk PRIMARY KEY (id),
     CONSTRAINT datatexts_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -100,9 +100,9 @@ CREATE TABLE DataDate(
 
 -- Every data_boolean are children of Data
 
-DROP TABLE IF EXISTS `DataBoolean`;
-CREATE TABLE DataBoolean(
-    id SERIAL,
+DROP TABLE IF EXISTS `DataBooleans`;
+CREATE TABLE DataBooleans(
+    id VARCHAR(64),
     value BOOLEAN NOT NULL,
     CONSTRAINT databoolean_pk PRIMARY KEY (id),
     CONSTRAINT databoolean_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -112,7 +112,7 @@ CREATE TABLE DataBoolean(
 
 DROP TABLE IF EXISTS `DataNumbers`;
 CREATE TABLE DataNumbers(
-    id SERIAL,
+    id VARCHAR(64),
     value NUMERIC NOT NULL,
     CONSTRAINT datanumbers_pk PRIMARY KEY (id),
     CONSTRAINT datanumbers_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -123,7 +123,7 @@ CREATE TABLE DataNumbers(
 
 DROP TABLE IF EXISTS `DataLinks`;
 CREATE TABLE DataLinks(
-    id SERIAL,
+    id VARCHAR(64),
     url VARCHAR(64) NOT NULL,
     type INTEGER NOT NULL,
     contentType INTEGER NOT NULL,
@@ -147,23 +147,25 @@ CREATE TABLE ContentTypeLinks(
 
 -- Données complexes
 
-DROP TABLE IF EXISTS `DataComplexe`;
-CREATE TABLE DataComplexe(
-    id SERIAL,
+DROP TABLE IF EXISTS `DataComplexes`;
+CREATE TABLE DataComplexes(
+    id VARCHAR(64),
     name VARCHAR(64) NOT NULL,
+    model VARCHAR(64),
     CONSTRAINT datacomplexe_pk PRIMARY KEY (id),
     CONSTRAINT datacomplexe_fk FOREIGN KEY (id) REFERENCES Data(id)
+    CONSTRAINT datacomplexe_fk2 FOREIGN KEY (model) REFERENCES DataModels(id)
 );
 
-DROP TABLE IF EXISTS `DataModel`;
-CREATE TABLE DataModel(
-    id SERIAL,
+DROP TABLE IF EXISTS `DataModels`;
+CREATE TABLE DataModels(
+    id VARCHAR(64),
     name VARCHAR(64) NOT NULL,
     CONSTRAINT datamodel_pk PRIMARY KEY (id),
     CONSTRAINT datamodel_fk FOREIGN KEY (id) REFERENCES Data(id)
 );
 
-DROP TABLE IF EXISTS `Complexe_Data`;
+DROP TABLE IF EXISTS `Complexes_Data`;
 CREATE TABLE Complexe_Data(
     label VARCHAR(64) NOT NULL,
     parent INTEGER NOT NULL,
@@ -173,7 +175,7 @@ CREATE TABLE Complexe_Data(
     CONSTRAINT complexedata_fk2 FOREIGN KEY (data) REFERENCES Data(id)
 );
 
-DROP TABLE IF EXISTS `Model_Data`;
+DROP TABLE IF EXISTS `Models_Data`;
 CREATE TABLE Model_Data(
     label VARCHAR(64) NOT NULL,
     parent INTEGER NOT NULL,
