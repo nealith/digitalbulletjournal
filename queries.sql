@@ -116,22 +116,28 @@ VALUES (?,?);
 DELETE FROM DataTexts WHERE id=?;
 -- Modifier une donnée texte
 UPDATE DataTexts SET text=? WHERE id=?;
+-- Accèder à une donnée texte
+SELECT * FROM DataTexts WHERE id=?;
 
 -- Créer une donnée date
-INSERT INTO DataDate (id,datetime)
+INSERT INTO DataDates (id,datetime)
 VALUES (?,?);
 -- Supprimer une donnée date
-DELETE FROM DataDate WHERE id=?;
+DELETE FROM DataDates WHERE id=?;
 -- Modifier une donnée date
-UPDATE DataDate SET datetime=? WHERE id=?;
+UPDATE DataDates SET datetime=? WHERE id=?;
+-- Accèder à une donnée data
+SELECT * FROM DataDates WHERE id=?;
 
 -- Créer une donnée boolean
-INSERT INTO DataBoolean (id,value)
+INSERT INTO DataBooleans (id,value)
 VALUES (?,?);
 -- Supprimer une donnée boolean
-DELETE FROM DataBoolean WHERE id=?;
+DELETE FROM DataBooleans WHERE id=?;
 -- Modifier une donnée boolean
-UPDATE DataBoolean SET value=? WHERE id=?;
+UPDATE DataBooleans SET value=? WHERE id=?;
+-- Accèder à une donnée boolean
+SELECT * FROM DataBooleans WHERE id=?;
 
 -- Créer une donnée nombre
 INSERT INTO DataNumbers (id,value)
@@ -140,6 +146,8 @@ VALUES (?,?);
 DELETE FROM DataNumbers WHERE id=?;
 -- Modifier une donnée nombre
 UPDATE DataNumbers SET value=? WHERE id=?;
+-- Accèder à une donnée nombre
+SELECT * FROM DataNumbers WHERE id=?;
 
 -- Créer une donnée lien
 INSERT INTO DataLinks (id,link,content_type,type)
@@ -150,6 +158,8 @@ DELETE FROM DataLinks WHERE id=?;
 UPDATE DataLinks SET link=? WHERE id=?;
 UPDATE DataLinks SET content_type=? WHERE id=?;
 UPDATE DataLinks SET type=? WHERE id=?;
+-- Accèder à une donnée lien
+SELECT * FROM DataLinks WHERE id=?;
 
 -- Créer un type de lien
 INSERT INTO TypeLinks (no,label)
@@ -165,33 +175,39 @@ DELETE FROM ContentTypeLinks WHERE no=?;
 
 
 -- Créer une donnée complexe
-INSERT INTO DataComplexe (id,name,model_id)
+INSERT INTO DataComplexes (id,name,model_id)
 VALUES (?,?,?);
 -- Supprimer une donnée complexe
-DELETE FROM DataComplexe WHERE id=?;
+DELETE FROM DataComplexes WHERE id=?;
 -- Modifier une donnée complexe
-UPDATE DataComplexe SET name=? WHERE id=?;
+UPDATE DataComplexes SET name=? WHERE id=?;
+-- Accèder à une donnée complexe
+SELECT * FROM DataComplexes WHERE id=?;
 
 -- Créer une donnée modèle
-INSERT INTO DataModel (id,name)
+INSERT INTO DataModels (id,name)
 VALUES (?,?);
 -- Supprimer une donnée modèle
-DELETE FROM DataModel WHERE id=?;
+DELETE FROM DataModels WHERE id=?;
 -- Modifier une donnée modèle
-UPDATE DataModel SET name=? WHERE id=?;
+UPDATE DataModels SET name=? WHERE id=?;
+-- Accèder à une donnée modèle
+SELECT * FROM DataModels WHERE id=?;
 
 -- Créer une relation de donnée complexe
-INSERT INTO DataComplexe (data,label,parent)
+INSERT INTO Complexes_Data (data,label,parent)
 VALUES (?,?,?);
 -- Supprimer une relation de donnée complexe
-DELETE FROM DataComplexe WHERE parent=? AND label=?;
--- Modifier une relation de donnée complexe
-UPDATE DataComplexe SET name=? WHERE id=?;
+DELETE FROM Complexes_Data WHERE parent=? AND label=?;
+-- Modifier une donnée relation de donnée complexe:
+UPDATE Complexes_Data SET data=? WHERE parent=? AND label=?;
+-- Accèder à l'id sous donnée
+SELECT data FROM Complexes_Data WHERE parent=? AND label=?;
 
 -- Créer une relation de donnée modèle
-INSERT INTO DataModel (data,label,parent)
+INSERT INTO Models_Data (data,label,parent)
 VALUES (?,?,?);
 -- Supprimer une relation de donnée modèle
-DELETE FROM DataModel WHERE parent=? AND label=? AND data=?;
--- Modifier une relation de donnée modèle
-UPDATE DataModel SET name=? WHERE id=?;
+DELETE FROM Models_Data WHERE parent=? AND label=? AND data=?;
+-- Lister les id des sous donnée d'un label
+SELECT data FROM Models_Data WHERE parent=? AND label=?;
