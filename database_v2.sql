@@ -72,18 +72,22 @@ CREATE TABLE Data(
     id VARCHAR(64),
     topic SERIAL NOT NULL,
     user VARCHAR(64) NOT NULL,
+    type VARCHAR(10) NOT NULL,
     log_datetime TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
     CONSTRAINT data_pk PRIMARY KEY (id),
-    CONSTRAINT data_fk FOREIGN KEY (topic_id) REFERENCES Topics(id)
+    CONSTRAINT data_fk FOREIGN KEY (topic) REFERENCES Topics(id)
+    CONSTRAINT data_fk2 FOREIGN KEY (user) REFERENCES Users(id)
+
 );
 
+-- Value of type : Text,Date,Boolean,Number,Link,Complexe,Model
 
 -- Every data_tables are children of Data
 
 DROP TABLE IF EXISTS `DataTexts`;
 CREATE TABLE DataTexts(
     id VARCHAR(64),
-    text VARCHAR(1000) NOT NULL,
+    value VARCHAR(1000) NOT NULL,
     CONSTRAINT datatexts_pk PRIMARY KEY (id),
     CONSTRAINT datatexts_fk FOREIGN KEY (id) REFERENCES Data(id)
 );
@@ -93,7 +97,7 @@ CREATE TABLE DataTexts(
 DROP TABLE IF EXISTS `DataDates`;
 CREATE TABLE DataDates(
     id VARCHAR(64),
-    date DATE NOT NULL,
+    value DATE NOT NULL,
     CONSTRAINT datatexts_pk PRIMARY KEY (id),
     CONSTRAINT datatexts_fk FOREIGN KEY (id) REFERENCES Data(id)
 );
@@ -116,33 +120,6 @@ CREATE TABLE DataNumbers(
     value NUMERIC NOT NULL,
     CONSTRAINT datanumbers_pk PRIMARY KEY (id),
     CONSTRAINT datanumbers_fk FOREIGN KEY (id) REFERENCES Data(id)
-);
-
-
--- Every data_links are children of Data
-
-DROP TABLE IF EXISTS `DataLinks`;
-CREATE TABLE DataLinks(
-    id VARCHAR(64),
-    url VARCHAR(64) NOT NULL,
-    type INTEGER NOT NULL,
-    contentType INTEGER NOT NULL,
-    CONSTRAINT datalinks_pk PRIMARY KEY (id),
-    CONSTRAINT datalinks_fk FOREIGN KEY (id) REFERENCES Data(id),
-    CONSTRAINT datalinks_fk FOREIGN KEY (type) REFERENCES TypeLinks(no),
-    CONSTRAINT datalinks_fk FOREIGN KEY (contentType) REFERENCES ContentTypeLinks(no)
-);
-
-DROP TABLE IF EXISTS `TypeLinks`;
-CREATE TABLE TypeLinks(
-    no INTEGER NOT NULL PRIMARY KEY,
-    label VARCHAR(64) NOT NULL,
-);
-
-DROP TABLE IF EXISTS `ContentTypeLinks`;
-CREATE TABLE ContentTypeLinks(
-    no INTEGER NOT NULL PRIMARY KEY,
-    label VARCHAR(64) NOT NULL,
 );
 
 -- Données complexes
