@@ -1,7 +1,7 @@
 {
     "base" : {
-        "create" : "INSERT INTO Data (id,log_datetime,topic,user)
-        VALUES (?,?,?,?);",
+        "create" : "INSERT INTO Data (id,log_datetime,topic,user,type)
+        VALUES (?,?,?,?,?);",
         "delete" : "DELETE FROM Data WHERE id=?;",
     } ,
     "text" : {
@@ -9,51 +9,67 @@
         VALUES (?,?);",
         "update" : "UPDATE DataTexts SET text=? WHERE id=?;",
         "delete" : "DELETE FROM DataTexts WHERE id=?;",
-        "get" :
+        "get" : "SELECT * FROM DataTexts WHERE id=?;"
     } ,
     "date" : {
-        "create" : "INSERT INTO DataDate (id,datetime)
+        "create" : "INSERT INTO DataDates (id,datetime)
         VALUES (?,?);",
-        "update" : "UPDATE DataDate SET datetime=? WHERE id=?;",
-        "delete" : "DELETE FROM DataDate WHERE id=?;",
-        "get" :
+        "update" : "UPDATE DataDates SET datetime=? WHERE id=?;",
+        "delete" : "DELETE FROM DataDates WHERE id=?;",
+        "get" : "SELECT * FROM DataDates WHERE id=?;"
     } ,
     "boolean" : {
-        "create" : "INSERT INTO DataBoolean (id,value)
+        "create" : "INSERT INTO DataBooleans (id,value)
         VALUES (?,?);",
-        "update" : "UPDATE DataBoolean SET value=? WHERE id=?;",
-        "delete" : "DELETE FROM DataBoolean WHERE id=?;",
-        "get" :
+        "update" : "UPDATE DataBooleans SET value=? WHERE id=?;",
+        "delete" : "DELETE FROM DataBooleans WHERE id=?;",
+        "get" : "SELECT * FROM DataBooleans WHERE id=?;"
     } ,
     "number" : {
         "create" : "INSERT INTO DataNumbers (id,value)
         VALUES (?,?);",
         "update" : "UPDATE DataNumbers SET value=? WHERE id=?;",
         "delete" : "DELETE FROM DataNumbers WHERE id=?;",
-        "get" :
+        "get" : "SELECT * FROM DataNumbers WHERE id=?;"
     } ,
     "link" : {
         "create" : "INSERT INTO DataLinks (id,link,content_type,type)
         VALUES (?,?,?,?);",
-        "update" : ,
+        "update" : {
+            "link" : "UPDATE DataLinks SET link=? WHERE id=?;",
+            "content_type" : "UPDATE DataLinks SET content_type=? WHERE id=?;",
+            "type" : "UPDATE DataLinks SET type=? WHERE id=?;"
+        },
         "delete" : "DELETE FROM DataLinks WHERE id=?;",
-        "get" :
+        "get" : "SELECT * FROM DataLinks WHERE id=?;"
     } ,
     "complexe" : {
         "create" : "INSERT INTO DataComplexe (id,name,model_id)
         VALUES (?,?,?);",
-        "update" : ,
+        "update" : "UPDATE DataComplexes SET name=? WHERE id=?;",
         "delete" : "DELETE FROM DataComplexe WHERE id=?;",
-        "get" :
+        "get" : "SELECT * FROM DataComplexes WHERE id=?;"
     } ,
     "model" : {
         "create" : "INSERT INTO DataModel (id,name)
     VALUES (?,?);",
-        "update" : ,
+        "update" : "UPDATE DataModels SET name=? WHERE id=?;",
         "delete" : "DELETE FROM DataModel WHERE id=?;",
-        "get" :
+        "get" : "SELECT * FROM DataModels WHERE id=?;"
     },
 
-
+    "complexe_data" : {
+        "create" : "INSERT INTO Complexes_Data (data,label,parent)
+        VALUES (?,?,?);",
+        "update" : "UPDATE Complexes_Data SET data=? WHERE parent=? AND label=?;",
+        "delete" : "DELETE FROM Complexes_Data WHERE parent=? AND label=?;",
+        "get" : "SELECT data FROM Complexes_Data WHERE parent=? AND label=?;"
+    },
+    "model_data" : {
+        "create" : "INSERT INTO Models_Data (data,label,parent)
+        VALUES (?,?,?);",
+        "delete" : "DELETE FROM Models_Data WHERE parent=? AND label=? AND data=?;",
+        "get" : "SELECT data FROM Models_Data WHERE parent=? AND label=?;"
+    }
 
 }
