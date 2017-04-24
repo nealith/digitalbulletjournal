@@ -22,7 +22,7 @@ var DB_UTILS = function(){
 
 }
 
-DB_UTILS.prototype.create = function (args) {
+DB_UTILS.prototype.insert = function (args) {
     var query = new Object();
     query.sql = 'INSERT INTO '+args.table+' (';
     var attr_values = Object.keys(args.values);

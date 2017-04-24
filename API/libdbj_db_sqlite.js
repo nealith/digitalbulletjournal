@@ -4,7 +4,7 @@ var sqliteDB = function(database){
     this.sqlite3 = require('sqlite3').verbose();
     this.db = new sqlite3.Database('database');
 
-    this.create = function(args,callback){
+    this.insert = function(args,callback){
         var query = this.utils.create(args);
         this.sqlite3.run(query.sql,query.params,callback);
     }
