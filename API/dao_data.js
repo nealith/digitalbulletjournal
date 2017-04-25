@@ -14,82 +14,93 @@ DAO_Data.prototype.create = function (type,value,stmt) {
 }
 
 DAO_Data.prototype.update = function (stmt,callback) {
-    if (!this.lock){
-        this.callback = callback;
-        this.lock = true;
-        this.db.begin_transaction();
+    if (!stmt) {
+        stmt = this.db.stmt(true);
+    }
+
+    if (this.type == 'Complexe' || this.type == 'Model') {
+        var labels = Object.keys(this.value);
         if (this.type == 'Complexe') {
-            this.update_Data_Complexe();
-        } else if (this.type == 'Model'){
-            this.update_Data_Model();
-        } else {
-            this.update_Data_Value();
+            for (label in labels) {
+                stmt.update({
+                table:'Complexes_Data',
+                keys:{
+                    parent:this.id,
+                    label:label
+                },
+                values:{
+                    data:this.value[label].id
+                });
+                this.value[label].update(null,stmt,false);
+            }
+        } else { // Model
+            var Sync = require('sync');
+            var results = Sync(function(){this.db.select({
+                table:'Models_Data',
+                keys:{
+                    parent:this.id
+                },
+                values:null
+            });})
+            for (label in labels) {
+                var ids = new Array()
+                for (var i = 0; i < results.length; i++) {
+                    if (results[i].label == label) {
+                        ids.push(results[i].id);
+                    }
+                }
+                for (var i = 0; i < this.value[label].length; i++) {
+
+                    var is_in = false;
+                    for (var k = 0; (k < ids.length && !is_in); k++) {
+                        if(ids[k] == this.value[label][i].id){
+                            is_in = true;
+                            ids[k] == null;
+                        }
+                    }
+                    if (!is_in) {
+                        stmt.insert({
+                        table:'Complexes_Data',
+                        keys:null,
+                        values:{
+                            parent:this.id,
+                            label:label
+                            data:this.value[label][i].id
+                        });
+                    }
+                    this.value[label][i].update(null,stmt,false);
+                }
+                for (var i = 0; i < ids.length; i++) {
+                    if (ids[i]) {
+                        stmt.delete({
+                        table:'Complexes_Data',
+                        keys:{
+                            parent:this.id,
+                            label:label,
+                            data:ids[i]
+                        },
+                        values:null);
+                    }
+                }
+            }
         }
     }
-}
-
-DAO_Data.prototype.update_Data = function (err,args) {
-    if (!err) {
-        this.db.update({
-            table:'Data'+this.type,
-            keys:{
-                id:this.id
-            },
-            values:null
-        },this.callback);
-    }
-    this.callback(err,null);
-}
-DAO_Data.prototype.update_Data_Value = function () {
-    this.db.update({
+    stmt.delete({
         table:'Data'+this.type,
         keys:{
             id:this.id
         },
-        values:{
-            value:this.value
-        }
-    },this.update_Data);
-}
-DAO_Data.prototype.update_Data_Complexe = function () {
-    this.num_sub_elem = Object.keys(this.value).length;
-    this.count_sub_elem = 0;
-    this.count_err = 0;
-    this.errs = '';
-    var labels = Object.keys(this.value);
-    for (label in labels) {
-        this.value[label].update();
-    }
-}
-DAO_Data.prototype.update_Data_Model = function () {
-    this.num_sub_elem = 0
-    this.count_sub_elem = 0;
-    this.count_err = 0;
-    this.errs = '';
-    var labels = Object.keys(this.value);
-    for (label in labels) {
-        this.num_sub_elem+=this.value[label].length;
-    }
-    for (label in labels) {
-        for (var i = 0; i < this.value[label].length; i++) {
-            this.value[label][i].update();
-        }
-    }
-}
-DAO_Data.prototype.update_count = function (err,args){
-    this.count_sub_elem++;
-    if (err) {this.count_err++;this.errs+=(err+';');}
-    if (this.count_sub_elem == this.num_sub_elem) {
-        if (this.count_err == 0) {
-            this.db.commit_transaction();
-        } else {
-            this.db.rollback_transaction();
-            err="Update::can't update data, id:"+this.id+", because of : {"+this.errs+"}";
-
-        }
-        this.lock = false;
-        this.callback(err,null);
-        this.callback = null;
+        values:null
+    });
+    stmt.delete({
+        table:'Data',
+        keys:{
+            id:this.id
+        },
+        values:null
+    });
+    if (!finalize) {
+        stmt.exec(callback);
 
     }
 }
@@ -103,23 +114,25 @@ DAO_Data.prototype.delete = function (callback,stmt,finalize) {
         var labels = Object.keys(this.value);
         if (this.type == 'Complexe') {
             for (label in labels) {
+                stmt.delete({
                 table:'Complexes_Data',
                 keys:{
                     parent:this.id,
                     data:this.value[label].id
                 },
-                values:null
+                values:null);
                 this.value[label].delete(null,stmt,false);
             }
         } else { // Model
             for (label in labels) {
                 for (var i = 0; i < this.value[label].length; i++) {
+                    stmt.delete({
                     table:'Models_Data',
                     keys:{
                         parent:this.id,
                         data:this.value[label].id
                     },
-                    values:null
+                    values:null);
                     this.value[label][i].delete(null,stmt,false);
                 }
             }

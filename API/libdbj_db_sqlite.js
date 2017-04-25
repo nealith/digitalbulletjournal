@@ -60,7 +60,7 @@ var sqliteDB = function(database){
             this.db.exec(this.sql,callback);
         }
     }
-    DB_TRANSACTION_STATEMENT.prototype.exec = function (err,args) {
+    DB_TRANSACTION_STATEMENT.prototype.finalize = function (err,args) {
         if (lock) {
             if (!err) {
                 this.db.run('COMMIT;');
@@ -91,8 +91,8 @@ this.prototype.select = function(args,callback){
     this.sqlite3.all(query.sql,query.params,callback);
 }
 
-this.prototype.stmt = function(){
-    return new DB_TRANSACTION_STATEMENT(this.db,this.utils);
+this.prototype.stmt = function(transaction){
+    return new DB_TRANSACTION_STATEMENT(this.db,this.utils,transaction);
 }
 
 module.exports = sqliteDB;
