@@ -16,7 +16,7 @@ DAO_User.prototype.update = function(stmt,callback){
 
     if(!stmt){stmt = this.db.stmt(true);}
 
-
+    
 
 }
 
@@ -55,7 +55,7 @@ DAO_User.prototype.get = function(id,callback){
         },
         values:null
     },dao.get_User);
-    return dao;
+
 }
 
 module.exports = DAO_User;
