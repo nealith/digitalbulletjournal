@@ -8,9 +8,10 @@
     "sqlite3": "^3.1.8",
     "socket.io": "^1.0.0",
     "async": "^1.5.0",
-    "shasum": "^1.0.2"
+    "shasum": "^1.0.2",
+    "sync": "^0.2.5"
   },
   "scripts": {
-  	"start": "node ./dbjserver.js"
+  	"start": "node ./api.js"
   }
 }
