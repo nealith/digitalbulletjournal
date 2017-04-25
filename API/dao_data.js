@@ -1,16 +1,55 @@
 var DAO_Data = function(db,id){
 
     this.db = db;
-    this.async = require("async");
     if (id) {
-        var obj = this.get(id);
-        this = obj;
+        this.get(id,this.erase);
     }
 
 }
 
-DAO_Data.prototype.create = function (type,value,stmt) {
+DAO_Data.prototype.erase = function (err,dao) {
+    if (!err) {
+        this = dao;
+    }
+}
 
+DAO_Data.prototype.create = function (topic,user,type,value,callback) {
+    shasum = require('shasum');
+    dao = new DAO_Data(this.db);
+    dao.callback = callback
+    dao.log_datetime = Date.now();
+    dao.id = shasum(topic+user+dao.log_datetime)
+    dao.topic = topic;
+    dao.user = user;
+    dao.type = type;
+    dao.value = value;
+    var stmt = this.db.stmt(true);
+    stmt.insert({
+    table:'Data',
+    keys:null,
+    values:{
+        log_datetime:dao.log_datetime,
+        id:dao.id,
+        topic:dao.topic,
+        user:dao.user,
+        type:dao.type
+    });
+    stmt.insert({
+    table:'Data'+dao.type,
+    keys:null,
+    values:{
+        id:dao.id,
+        value:value
+    });
+    stmt.exec();
+
+}
+
+DAO_Data.prototype.create_callback = function (err,args) {
+
+    if (!err) {
+        this.callback(err,this);
+    }
 }
 
 DAO_Data.prototype.update = function (stmt,callback) {

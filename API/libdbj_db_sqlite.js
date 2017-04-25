@@ -87,7 +87,7 @@ this.prototype.delete = function(args,callback){
     this.sqlite3.run(query.sql,query.params,callback);
 }
 this.prototype.select = function(args,callback){
-    var query = this.utils.delete(args);
+    var query = this.utils.select(args);
     this.sqlite3.all(query.sql,query.params,callback);
 }
 
