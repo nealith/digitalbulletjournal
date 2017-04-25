@@ -52,7 +52,7 @@ DAO_Data.prototype.create_callback = function (err,args) {
     }
 }
 
-DAO_Data.prototype.update = function (stmt,callback) {
+DAO_Data.prototype.update = function (callback,stmt,finalize) {
     if (!stmt) {
         stmt = this.db.stmt(true);
     }

@@ -74,24 +74,24 @@ var sqliteDB = function(database){
 
 }
 
-this.prototype.insert = function(args,callback){
+sqliteDB.prototype.insert = function(args,callback){
     var query = this.utils.create(args);
     this.sqlite3.run(query.sql,query.params,callback);
 }
-this.prototype.update = function(args,callback){
+sqliteDB.prototype.update = function(args,callback){
     var query = this.utils.update(args);
     this.sqlite3.run(query.sql,query.params,callback);
 }
-this.prototype.delete = function(args,callback){
+sqliteDB.prototype.delete = function(args,callback){
     var query = this.utils.delete(args);
     this.sqlite3.run(query.sql,query.params,callback);
 }
-this.prototype.select = function(args,callback){
+sqliteDB.prototype.select = function(args,callback){
     var query = this.utils.select(args);
     this.sqlite3.all(query.sql,query.params,callback);
 }
 
-this.prototype.stmt = function(transaction){
+sqliteDB.prototype.stmt = function(transaction){
     return new DB_TRANSACTION_STATEMENT(this.db,this.utils,transaction);
 }
 
