@@ -7,53 +7,219 @@ var DAO_Data = function(db,id){
         this = obj;
     }
 
+    this.lock = false;
+
 }
 
 DAO_Data.prototype.create = function (type,value) {
 
 }
 
-DAO_Data.prototype.update = function () {
-
-}
-
-DAO_Data.prototype.delete = function () {
-    async.waterfall([
-        function(callback) {
-            callback(null, 'one', 'two');
-        },
-        function(arg1, arg2, callback) {
-            // arg1 now equals 'one' and arg2 now equals 'two'
-            callback(null, 'three');
-        },
-        function(arg1, callback) {
-            // arg1 now equals 'three'
-            callback(null, 'done');
+DAO_Data.prototype.update = function (callback) {
+    if (!this.lock){
+        this.callback = callback;
+        this.lock = true;
+        this.db.begin_transaction();
+        if (this.type == 'Complexe') {
+            this.update_Data_Complexe();
+        } else if (this.type == 'Model'){
+            this.update_Data_Model();
+        } else {
+            this.update_Data_Value();
         }
-    ], function (err, result) {
-        // result now equals 'done'
-    });
+    }
 }
 
-DAO_Data.prototype.get_Data = function(args,callback){
+DAO_Data.prototype.update_Data = function (err,args) {
+    if (!err) {
+        this.db.update({
+            table:'Data'+this.type,
+            keys:{
+                id:this.id
+            },
+            values:null
+        },this.callback);
+    }
+    this.callback(err,null);
+}
+DAO_Data.prototype.update_Data_Value = function () {
+    this.db.update({
+        table:'Data'+this.type,
+        keys:{
+            id:this.id
+        },
+        values:{
+            value:this.value
+        }
+    },this.update_Data);
+}
+DAO_Data.prototype.update_Data_Complexe = function () {
+    this.num_sub_elem = Object.keys(this.value).length;
+    this.count_sub_elem = 0;
+    this.count_err = 0;
+    this.errs = '';
+    var labels = Object.keys(this.value);
+    for (label in labels) {
+        this.value[label].update();
+    }
+}
+DAO_Data.prototype.update_Data_Model = function () {
+    this.num_sub_elem = 0
+    this.count_sub_elem = 0;
+    this.count_err = 0;
+    this.errs = '';
+    var labels = Object.keys(this.value);
+    for (label in labels) {
+        this.num_sub_elem+=this.value[label].length;
+    }
+    for (label in labels) {
+        for (var i = 0; i < this.value[label].length; i++) {
+            this.value[label][i].update();
+        }
+    }
+}
+DAO_Data.prototype.update_count = function (err,args){
+    this.count_sub_elem++;
+    if (err) {this.count_err++;this.errs+=(err+';');}
+    if (this.count_sub_elem == this.num_sub_elem) {
+        if (this.count_err == 0) {
+            this.db.commit_transaction();
+        } else {
+            this.db.rollback_transaction();
+            err="Update::can't update data, id:"+this.id+", because of : {"+this.errs+"}";
+
+        }
+        this.lock = false;
+        this.callback(err,null);
+        this.callback = null;
+
+    }
+}
+
+DAO_Data.prototype.delete = function (callback) {
+    if (!this.lock){
+        this.callback = callback;
+        this.lock = true;
+        this.db.begin_transaction();
+        if (this.type == 'Complexe') {
+            this.delete_Data_Complexe();
+        } else if (this.type == 'Model'){
+            this.delete_Data_Model();
+        } else {
+            this.delete_Data_Value();
+        }
+    }
+}
+
+DAO_Data.prototype.delete_Data = function (err,args) {
+    if (!err) {
+        this.db.delete({
+            table:'Data'+this.type,
+            keys:{
+                id:this.id
+            },
+            values:null
+        },this.delete_finalize);
+    }
+
+}
+DAO_Data.prototype.delete_finalize = function (err,args) {
+
+    if (!err) {
+        this.db.commit_transaction();
+    } else {
+        this.db.rollback_transaction();
+    }
+    this.callback(err,null);
+    this.callback = null;
+    this.lock = false;
+}
+
+
+DAO_Data.prototype.delete_Data_Value = function () {
+    this.db.delete({
+        table:'Data'+this.type,
+        keys:{
+            id:this.id
+        },
+        values:null
+    },this.delete_Data);
+}
+DAO_Data.prototype.delete_Data_Complexe = function () {
+    this.num_sub_elem = Object.keys(this.value).length;
+    this.count_sub_elem = 0;
+    this.count_err = 0;
+    this.errs = '';
+    var labels = Object.keys(this.value);
+    for (label in labels) {
+        this.value[label].delete();
+    }
+}
+DAO_Data.prototype.delete_Data_Model = function () {
+    this.num_sub_elem = 0
+    this.count_sub_elem = 0;
+    this.count_err = 0;
+    this.errs = '';
+    var labels = Object.keys(this.value);
+    for (label in labels) {
+        this.num_sub_elem+=this.value[label].length;
+    }
+    for (label in labels) {
+        for (var i = 0; i < this.value[label].length; i++) {
+            this.value[label][i].delete();
+        }
+    }
+}
+DAO_Data.prototype.delete_count = function (err,args){
+    this.count_sub_elem++;
+    if (err) {this.count_err++;this.errs+=(err+';');}
+    if (this.count_sub_elem == this.num_sub_elem) {
+        if (this.count_err == 0) {
+            this.delete_Data_Value();
+        } else {
+            this.db.rollback_transaction();
+            this.lock = false;
+            this.callback("Delete::can't delete data, id:"+this.id+", because of : {"+this.errs+"}",null);
+            this.callback = null;
+        }
+    }
+}
+
+DAO_Data.prototype.get_Data = function(err,args){
     if (args) {
         this.log_datetime = args.log_datetime
         this.topic = args.topic
         this.user = args.user
         this.type = args.type
-        if (type == 'Complexe') {
-            this.get_Data_Type = this.get_Data_Type_Complexe
-            this.update = this.update_Complexe
-        } else if (type == 'Model'){
-            this.get_Data_Type = this.get_Data_Type_Model
-            this.update = this.update_Model
+        if (this.type == 'Complexe') {
+            this.db.select({
+                table:'Complexes_Data',
+                keys:{
+                    parent:this.id
+                },
+                values:null
+            },this.get_Data_Complexe);
+
+        } else if (this.type == 'Model'){
+            this.db.select({
+                table:'Models_Data',
+                keys:{
+                    parent:this.id
+                },
+                values:null
+            },this.get_Data_Model);
+
         } else {
-            this.get_Data_Type = this.get_Data_Type_Value
-            this.update = this.update_Value
+            this.db.select({
+                table:'Data'+this.type,
+                keys:{
+                    id:this.id
+                },
+                values:null
+            },this.get_Data_Value);
         }
 
 
-        this.db.get('SELECT * FROM Data WHERE id=$id',{$id:this.id},this.get_Data_Type);
     } else {
         this.callback("this data does'nt exist",null)
     }
@@ -61,9 +227,10 @@ DAO_Data.prototype.get_Data = function(args,callback){
 
 }
 
-DAO_Data.prototype.get_Data_Type_Value = function(args,callback){
+// Text,Date,Boolean,Number
+DAO_Data.prototype.get_Data_Value = function(err,args){
     if (args) {
-        this.value = args.value
+        this.value = args[0].value
         this.callback(null,this);
         this.callback = null;
     } else {
@@ -73,9 +240,13 @@ DAO_Data.prototype.get_Data_Type_Value = function(args,callback){
 
 }
 
-DAO_Data.prototype.get_Data_Type_Complexe = function(args,callback){
+DAO_Data.prototype.get_Data_Complexe = function(err,args){
     if (args) {
+        this.value = new Object();
+        for (row in args){
+            this.values.[row.label] = new DAO_Data(this.db,row.data);
 
+        }
         this.callback(null,this);
         this.callback = null;
     } else {
@@ -85,11 +256,18 @@ DAO_Data.prototype.get_Data_Type_Complexe = function(args,callback){
 
 }
 
-DAO_Data.prototype.get_Data_Type_Model = function(args,callback){
+DAO_Data.prototype.get_Data_Model = function(err,args){
     if (args) {
-
+        this.value = new Object();
+        for (row in args){
+            if (!this.values.[row.label]) {
+                this.values.[row.label] = new Array();
+            }
+            this.values.[row.label].push(new DAO_Data(this.db,row.data));
+        }
         this.callback(null,this);
         this.callback = null;
+        this.lock = false;
     } else {
         this.callback("this data does'nt exist",null)
     }
@@ -101,8 +279,15 @@ DAO_Data.prototype.get = function (id,callback) {
 
     dao = new DAO_Data(this.db);
     dao.callback = callback
+    dao.lock = true;
 
-    dao.db.get('SELECT * FROM Data WHERE id=$id',{$id:id},dao.get_Data);
+    this.db.select({
+        table:'Data',
+        keys:{
+            id:this.id
+        },
+        values:null
+    },dao.get_Data);
 }
 
 DAO_Data.prototype.get_all_type = function () {
