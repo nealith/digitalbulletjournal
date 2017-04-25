@@ -7,15 +7,13 @@ var DAO_Data = function(db,id){
         this = obj;
     }
 
-    this.lock = false;
+}
+
+DAO_Data.prototype.create = function (type,value,stmt) {
 
 }
 
-DAO_Data.prototype.create = function (type,value) {
-
-}
-
-DAO_Data.prototype.update = function (callback) {
+DAO_Data.prototype.update = function (stmt,callback) {
     if (!this.lock){
         this.callback = callback;
         this.lock = true;
@@ -96,92 +94,54 @@ DAO_Data.prototype.update_count = function (err,args){
     }
 }
 
-DAO_Data.prototype.delete = function (callback) {
-    if (!this.lock){
-        this.callback = callback;
-        this.lock = true;
-        this.db.begin_transaction();
+DAO_Data.prototype.delete = function (callback,stmt,finalize) {
+    if (!stmt) {
+        stmt = this.db.stmt(true);
+    }
+
+    if (this.type == 'Complexe' || this.type == 'Model') {
+        var labels = Object.keys(this.value);
         if (this.type == 'Complexe') {
-            this.delete_Data_Complexe();
-        } else if (this.type == 'Model'){
-            this.delete_Data_Model();
-        } else {
-            this.delete_Data_Value();
+            for (label in labels) {
+                table:'Complexes_Data',
+                keys:{
+                    parent:this.id,
+                    data:this.value[label].id
+                },
+                values:null
+                this.value[label].delete(null,stmt,false);
+            }
+        } else { // Model
+            for (label in labels) {
+                for (var i = 0; i < this.value[label].length; i++) {
+                    table:'Models_Data',
+                    keys:{
+                        parent:this.id,
+                        data:this.value[label].id
+                    },
+                    values:null
+                    this.value[label][i].delete(null,stmt,false);
+                }
+            }
         }
     }
-}
-
-DAO_Data.prototype.delete_Data = function (err,args) {
-    if (!err) {
-        this.db.delete({
-            table:'Data'+this.type,
-            keys:{
-                id:this.id
-            },
-            values:null
-        },this.delete_finalize);
-    }
-
-}
-DAO_Data.prototype.delete_finalize = function (err,args) {
-
-    if (!err) {
-        this.db.commit_transaction();
-    } else {
-        this.db.rollback_transaction();
-    }
-    this.callback(err,null);
-    this.callback = null;
-    this.lock = false;
-}
-
-
-DAO_Data.prototype.delete_Data_Value = function () {
-    this.db.delete({
+    stmt.delete({
         table:'Data'+this.type,
         keys:{
             id:this.id
         },
         values:null
-    },this.delete_Data);
-}
-DAO_Data.prototype.delete_Data_Complexe = function () {
-    this.num_sub_elem = Object.keys(this.value).length;
-    this.count_sub_elem = 0;
-    this.count_err = 0;
-    this.errs = '';
-    var labels = Object.keys(this.value);
-    for (label in labels) {
-        this.value[label].delete();
-    }
-}
-DAO_Data.prototype.delete_Data_Model = function () {
-    this.num_sub_elem = 0
-    this.count_sub_elem = 0;
-    this.count_err = 0;
-    this.errs = '';
-    var labels = Object.keys(this.value);
-    for (label in labels) {
-        this.num_sub_elem+=this.value[label].length;
-    }
-    for (label in labels) {
-        for (var i = 0; i < this.value[label].length; i++) {
-            this.value[label][i].delete();
-        }
-    }
-}
-DAO_Data.prototype.delete_count = function (err,args){
-    this.count_sub_elem++;
-    if (err) {this.count_err++;this.errs+=(err+';');}
-    if (this.count_sub_elem == this.num_sub_elem) {
-        if (this.count_err == 0) {
-            this.delete_Data_Value();
-        } else {
-            this.db.rollback_transaction();
-            this.lock = false;
-            this.callback("Delete::can't delete data, id:"+this.id+", because of : {"+this.errs+"}",null);
-            this.callback = null;
-        }
+    });
+    stmt.delete({
+        table:'Data',
+        keys:{
+            id:this.id
+        },
+        values:null
+    });
+    if (!finalize) {
+        stmt.exec(callback);
+
     }
 }
 
