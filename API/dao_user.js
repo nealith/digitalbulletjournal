@@ -9,7 +9,12 @@ var DAO_User = function(db,id){
 
 DAO_User.prototype.erase = function (err,dao) {
     if (!err) {
-        this = dao;
+        this.id = this.id;
+        this.first_name = args.first_name;
+        this.last_name = args.last_name;
+        this.nick_name = args.nick_name;
+        this.creation_date = args.creation_date;
+        this.e_mail = args.e_mail;
     }
 }
 
