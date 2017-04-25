@@ -7,16 +7,50 @@ var DAO_User = function(db,id){
     }
 }
 
+DAO_User.prototype.erase = function (err,dao) {
+    if (!err) {
+        this = dao;
+    }
+}
 
-DAO_User.prototype.create = function(args,stmt){
+DAO_User.prototype.create = function(first_name,password,nick_name,last_name,e_mail,callback){
 
+    dao = new DAO_User(this.db);
+    dao.callback = callback;
+    dao.creation_date = Date.now();
+    dao.first_name = first_name;
+    dao.last_name = last_name;
+    dao.nick_name = nick_name;
+    dao.password = password;
+    dao.e_mail = e_mail;
+    var stmt = this.db.stmt(true);
+    stmt.insert({
+        table:'Users',
+        keys:null,
+        values:{
+            creation_date:dao.creation_date,
+            first_name:dao.first_name,
+            last_name:dao.last_name,
+            nick_name:dao.nick_name,
+            e_mail:dao.e_mail,
+            password:dao.password
+        }
+    });
+    stmt.exec();
+}
+
+DAO_User.prototype.create_callback = function (err,args) {
+
+    if (!err) {
+        this.callback(err,this);
+    }
 }
 
 DAO_User.prototype.update = function(stmt,callback){
 
     if(!stmt){stmt = this.db.stmt(true);}
 
-    
+
 
 }
 
