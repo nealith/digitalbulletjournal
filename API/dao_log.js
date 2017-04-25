@@ -10,7 +10,11 @@ var DAO_Logs = function(db,id){
 
 DAO_Logs.prototype.erase = function (err,dao) {
     if (!err) {
-        this = dao;
+        this.id = dao.id;
+        this.title = args.title;
+        this.creation_date = args.creation_date;
+        this.privacy = args.privacy;
+        this.owner = args.owner;
     }
 }
 
