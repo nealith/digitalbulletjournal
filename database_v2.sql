@@ -23,7 +23,7 @@ CREATE TABLE Users(
     nick_name VARCHAR(50),
     creation_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
     e_mail VARCHAR(50) UNIQUE,
-    CONSTRAINT users_pk PRIMARY KEY (id),
+    CONSTRAINT users_pk PRIMARY KEY (id)
 );
 
 
@@ -50,18 +50,18 @@ CREATE TABLE Logs_Users(
     writting_rights BOOLEAN NOT NULL,
     admin_rights BOOLEAN NOT NULL,
     adding_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
-    CONSTRAINT logs_users_pk PRIMARY KEY (id_log,id_user),
-    CONSTRAINT logs_user_id_fk FOREIGN KEY (id_user) REFERENCES Users(id),
-    CONSTRAINT logs_log_id_fk FOREIGN KEY (id_log) REFERENCES Logs(id)
+    CONSTRAINT logs_users_pk PRIMARY KEY (log,user),
+    CONSTRAINT logs_user_id_fk FOREIGN KEY (user) REFERENCES Users(id),
+    CONSTRAINT logs_log_id_fk FOREIGN KEY (log) REFERENCES Logs(id)
 );
 
 DROP TABLE IF EXISTS `Topics`;
 CREATE TABLE Topics(
     id SERIAL AUTO_INCREMENT,
-    title VARCHAR(64) NOT NULL
-    log_id SERIAL NOT NULL,
+    title VARCHAR(64) NOT NULL,
+    log SERIAL NOT NULL,
     CONSTRAINT topic_pk PRIMARY KEY (id),
-    CONSTRAINT topic_fk FOREIGN KEY (log_id) REFERENCES Logs(id)
+    CONSTRAINT topic_fk FOREIGN KEY (log) REFERENCES Logs(id)
 );
 
 
@@ -143,21 +143,21 @@ CREATE TABLE DataModels(
 );
 
 DROP TABLE IF EXISTS `Complexes_Data`;
-CREATE TABLE Complexe_Data(
+CREATE TABLE Complexes_Data(
     label VARCHAR(64) NOT NULL,
-    parent INTEGER NOT NULL,
+    parent VARCHAR(64) NOT NULL,
+    data VARCHAR(64) NOT NULL,
     CONSTRAINT complexedata_pk PRIMARY KEY (label,parent),
     CONSTRAINT complexedata_fk FOREIGN KEY (parent) REFERENCES DataComplexe(id),
-    data INTEGER NOT NULL,
     CONSTRAINT complexedata_fk2 FOREIGN KEY (data) REFERENCES Data(id)
 );
 
 DROP TABLE IF EXISTS `Models_Data`;
-CREATE TABLE Model_Data(
+CREATE TABLE Models_Data(
     label VARCHAR(64) NOT NULL,
-    parent INTEGER NOT NULL,
-    data INTEGER NULL,
+    parent VARCHAR(64) NOT NULL,
+    data VARCHAR(64) NULL,
     CONSTRAINT modeldata_fk2 FOREIGN KEY (data) REFERENCES Data(id)
     CONSTRAINT modeldata_fk FOREIGN KEY (parent) REFERENCES DataComplexe(id),
-    CONSTRAINT modeldata_pk UNIQUE (label,parent,data),
+    CONSTRAINT modeldata_pk UNIQUE (label,parent,data)
 );
