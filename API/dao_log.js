@@ -61,20 +61,6 @@ DAO_Logs.prototype.delete = function(stmt,finalize){
 
 }
 
-DAO_Logs.prototype.get_Logs = function(err,args){
-    if(args){
-
-        // List of data
-        this.title = args.title;
-        this.creation_date = args.creation_date;
-        this.privacy = args.privacy;
-        this.owner = args.owner;
-
-    }else{
-        this.callback("This user doesn't exist", null);
-    }
-}
-
 
 DAO_Logs.prototype.get = function(id,callback){
 
@@ -85,10 +71,25 @@ DAO_Logs.prototype.get = function(id,callback){
     this.db.select({
         table:'Logs',
         keys:{
-            id:this.id
+            id:id
         },
         values:null
-    },dao.get_Logs);
+    },function(err,args){
+        if(args){
+
+            // List of data
+            console.log(args);
+            dao.title = args[0].title;
+            dao.creation_date = args[0].creation_date;
+            dao.privacy = args[0].privacy;
+            dao.owner = args[0].owner;
+            dao.id = args[0].id;
+            dao.callback(null,dao);
+        }else{
+            dao.lock = false;
+            callback(err,null);
+        }
+    });
 
 }
 

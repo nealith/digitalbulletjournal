@@ -65,20 +65,6 @@ DAO_User.prototype.delete = function(stmt,finalize){
 
 }
 
-DAO_User.prototype.get_User = function(err,args){
-    if(args){
-
-        // List of data
-        this.first_name = args.first_name;
-        this.last_name = args.last_name;
-        this.nick_name = args.nick_name;
-        this.creation_date = args.creation_date;
-        this.e_mail = args.e_mail;
-
-    }else{
-        this.callback("This user doesn't exist", null);
-    }
-}
 
 
 DAO_User.prototype.get = function(id,callback){
@@ -90,10 +76,28 @@ DAO_User.prototype.get = function(id,callback){
     this.db.select({
         table:'Users',
         keys:{
-            id:this.id
+            id:id
         },
         values:null
-    },dao.get_User);
+    },function(err,args){
+        if(args){
+
+            // List of data
+            console.log(args);
+            dao.id = args[0].id;
+            dao.first_name = args[0].first_name;
+            dao.last_name = args[0].last_name;
+            dao.nick_name = args[0].nick_name;
+            dao.creation_date = args[0].creation_date;
+            dao.e_mail = args[0].e_mail;
+            callback(null,dao);
+        }else{
+            dao.lock = false;
+            callback(err,null)
+        }
+    }
+
+    );
 
 }
 
