@@ -56,14 +56,24 @@ function DAO_Data(db,id){
                 type:dao.type
             }
         });
-        stmt.insert({
-            table:'Data'+dao.type+'s',
-            keys:null,
-            values:{
-                id:dao.id,
-                value:dao.value
-            }
-        });
+        if (dao.type=='Complexe' || dao.type=='Model') {
+            stmt.insert({
+                table:'Data'+dao.type+'s',
+                keys:null,
+                values:{
+                    id:dao.id,
+                }
+            });
+        } else {
+            stmt.insert({
+                table:'Data'+dao.type+'s',
+                keys:null,
+                values:{
+                    id:dao.id,
+                    value:dao.value
+                }
+            });
+        }
         stmt.exec(callback);
 
     }
