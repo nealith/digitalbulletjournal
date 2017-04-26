@@ -17,23 +17,7 @@
 
   var datas = new Array();
 
-  socket.on('data',function (json) {
-    var data = JSON.parse(json, function (key, value) {
-        if (value
-            && typeof value === "string"
-            && value.substr(0,8) == "function") {
-            var startBody = value.indexOf('{') + 1;
-            var endBody = value.lastIndexOf('}');
-            var startArgs = value.indexOf('(') + 1;
-            var endArgs = value.indexOf(')');
-
-            return new Function(value.substring(startArgs, endArgs), value.substring(startBody, endBody));
-
-        }
-
-        return value;
-
-    });
+  socket.on('data',function (data) {
     console.log(data);
     datas.push(data);
   });

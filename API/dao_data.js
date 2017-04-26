@@ -133,21 +133,19 @@ function DAO_Data(db,id){
                     }
                 }
             }
+        } else {
+            console.log(this);
+            stmt.update({
+                table:'Data'+this.type+'s',
+                keys:{
+                    id:this.id
+                },
+                values:{
+                    value:this.value
+                }
+            });
+
         }
-        stmt.delete({
-            table:'Data'+this.type+'s',
-            keys:{
-                id:this.id
-            },
-            values:null
-        });
-        stmt.delete({
-            table:'Data',
-            keys:{
-                id:this.id
-            },
-            values:null
-        });
         if (!finalize) {
             stmt.exec(callback);
 
