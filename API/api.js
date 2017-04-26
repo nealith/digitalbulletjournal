@@ -71,30 +71,41 @@ io.on('connection', function (socket) {
     socket.emit('connection_ready','coucou');
 
     var emitMessage = function(err,obj){
-        var data = JSON.stringify({err:err,obj:obj},function (key, value) {
-            if (typeof value === 'function') {
-                return value.toString();
-            }
-            return value;
-        });
+        data={err:err,obj:obj};
+        if (err) {
+            data.err = data.err.toString();
+        }
+        
     	socket.emit('data',data);
     };
 
     socket.on('add', function (data) {
-        api_dao_data.create(data.topic,data.user,data.type,data.value,emitMessage);
+        if(data){
+            api_dao_data.create(data.topic,data.user,data.type,data.value,emitMessage);
+        }
+
 	});
     socket.on('get', function (data) {
-        api_dao_data.get(data.id,emitMessage);
+        if(data){
+            api_dao_data.get(data.id,emitMessage);
+        }
+
 	});
     socket.on('delete', function (data) {
-        var tmp = new dao_data(db);
-        tmp.erase(null,data);
-        tmp.delete(emitMessage);
+        if(data){
+            var tmp = new dao_data(db);
+            tmp.erase(null,data);
+            tmp.delete(emitMessage);
+        }
+
 	});
     socket.on('update', function (data) {
-        var tmp = new dao_data(db);
-        tmp.erase(null,data);
-        tmp.update(emitMessage);
+        if(data){
+            var tmp = new dao_data(db);
+            tmp.erase(null,data);
+            tmp.update(emitMessage);
+        }
+
 	});
     socket.on('disconnect', function () {
 		io.emit('user disconnected');
