@@ -98,58 +98,58 @@ function DAO_Data(db,id){
                 }
             } else { // Model
                 var Sync = require('sync');
-                var results = Sync(function(){
-                    this.db.select({
-                        table:'Models_Data',
-                        keys:{
-                            parent:this.id
-                        },
-                        values:null
-                    },function(){});
-                })
-                for (label in this.value) {
-                    var ids = new Array()
-                    for (var i = 0; i < results.length; i++) {
-                        if (results[i].label == label) {
-                            ids.push(results[i].id);
-                        }
-                    }
-                    for (var i = 0; i < this.value[label].length; i++) {
-
-                        var is_in = false;
-                        for (var k = 0; (k < ids.length && !is_in); k++) {
-                            if(ids[k] == this.value[label][i].id){
-                                is_in = true;
-                                ids[k] == null;
+                var dao = this;
+                this.db.select.sync({
+                    table:'Models_Data',
+                    keys:{
+                        parent:this.id
+                    },
+                    values:null
+                },function(){
+                    for (label in dao.value) {
+                        var ids = new Array()
+                        for (var i = 0; i < results.length; i++) {
+                            if (results[i].label == label) {
+                                ids.push(results[i].id);
                             }
                         }
-                        if (!is_in) {
-                            stmt.insert({
-                                table:'Complexes_Data',
-                                keys:null,
-                                values:{
-                                    parent:this.id,
-                                    label:label,
-                                    data:this.value[label][i].id
+                        for (var i = 0; i < dao.value[label].length; i++) {
+
+                            var is_in = false;
+                            for (var k = 0; (k < ids.length && !is_in); k++) {
+                                if(ids[k] == dao.value[label][i].id){
+                                    is_in = true;
+                                    ids[k] == null;
                                 }
-                            });
+                            }
+                            if (!is_in) {
+                                stmt.insert({
+                                    table:'Complexes_Data',
+                                    keys:null,
+                                    values:{
+                                        parent:dao.id,
+                                        label:label,
+                                        data:dao.value[label][i].id
+                                    }
+                                });
+                            }
+                            dao.value[label][i].update(null,stmt,false);
                         }
-                        this.value[label][i].update(null,stmt,false);
-                    }
-                    for (var i = 0; i < ids.length; i++) {
-                        if (ids[i]) {
-                            stmt.delete({
-                                table:'Complexes_Data',
-                                keys:{
-                                    parent:this.id,
-                                    label:label,
-                                    data:ids[i]
-                                },
-                                values:null
-                            });
+                        for (var i = 0; i < ids.length; i++) {
+                            if (ids[i]) {
+                                stmt.delete({
+                                    table:'Complexes_Data',
+                                    keys:{
+                                        parent:dao.id,
+                                        label:label,
+                                        data:ids[i]
+                                    },
+                                    values:null
+                                });
+                            }
                         }
                     }
-                }
+                });
             }
         } else {
             console.log(this);
