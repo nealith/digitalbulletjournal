@@ -42,6 +42,14 @@
   	socket.emit('disconnect');
   };
 
+  var getUser = function(data){
+      socket.emit('get_User',data);
+  }
+
+  var getLogs = function(data){
+      socket.emit('get_Logs',data);
+  }
+
 </script>
 
 </html>
