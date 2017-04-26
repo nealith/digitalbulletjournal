@@ -18,7 +18,8 @@ var io = require('socket.io').listen(server);
  	SQL CONFIGURATION
 	========================================================================== */
 
-var db = require('./libdbj_db_sqlite.js');
+var DB = require('./libdbj_db_sqlite.js');
+var db = new DB('./test.db')
 
 /*	==========================================================================
  	TEST SECTION
@@ -67,23 +68,33 @@ var sync = require('sync');
 
 io.on('connection', function (socket) {
 
+    socket.emit('connection_ready','coucou');
+
     var emitMessage = function(err,obj){
-
-    	socket.emit('data',{err:err,obj:obj});
-
+        var data = JSON.stringify({err:err,obj:obj},function (key, value) {
+            if (typeof value === 'function') {
+                return value.toString();
+            }
+            return value;
+        });
+    	socket.emit('data',data);
     };
 
     socket.on('add', function (data) {
         api_dao_data.create(data.topic,data.user,data.type,data.value,emitMessage);
 	});
     socket.on('get', function (data) {
-        api_dao_data.create(data.id,emitMessage);
+        api_dao_data.get(data.id,emitMessage);
 	});
     socket.on('delete', function (data) {
-        data.delete(emitMessage);
+        var tmp = new dao_data(db);
+        tmp.erase(null,data);
+        tmp.delete(emitMessage);
 	});
     socket.on('update', function (data) {
-        data.update(emitMessage);
+        var tmp = new dao_data(db);
+        tmp.erase(null,data);
+        tmp.update(emitMessage);
 	});
     socket.on('disconnect', function () {
 		io.emit('user disconnected');

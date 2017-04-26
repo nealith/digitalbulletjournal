@@ -3,7 +3,6 @@
  <head>
 
 	<meta charset="UTF-8">
-	<link rel="stylesheet" type="text/css" href="style.css">
 	<title>PatternSiloAdmin</title>
 	<meta name="viewport" content="width=device-width"/>
  </head>
@@ -11,13 +10,30 @@
  <body>
 
  </body>
-<script src="socket.io.js"></script>
+<script src="./socket.io-client/dist/socket.io.js"></script>
 <script>
+
   var socket = io.connect('http://localhost:5110');
 
-  var datas = new Object();
+  var datas = new Array();
 
-  socket.on('data',function (data) {
+  socket.on('data',function (json) {
+    var data = JSON.parse(json, function (key, value) {
+        if (value
+            && typeof value === "string"
+            && value.substr(0,8) == "function") {
+            var startBody = value.indexOf('{') + 1;
+            var endBody = value.lastIndexOf('}');
+            var startArgs = value.indexOf('(') + 1;
+            var endArgs = value.indexOf(')');
+
+            return new Function(value.substring(startArgs, endArgs), value.substring(startBody, endBody));
+
+        }
+
+        return value;
+
+    });
     console.log(data);
     datas.push(data);
   });
@@ -27,23 +43,17 @@
   });
 
   var add = function(data){
-  	socket.emit('add');
+  	socket.emit('add',data);
   };
   var get = function(data){
-  	socket.emit('get');
+  	socket.emit('get',data);
   };
-  var delete = function(data){
-  	socket.emit('delete');
+  var del = function(data){
+  	socket.emit('delete',data);
   };
   var update = function(data){
-  	socket.emit('update');
+  	socket.emit('update',data);
   };
-
-
-
-
-
-
   var disconnect = function(){
   	socket.emit('disconnect');
   };
