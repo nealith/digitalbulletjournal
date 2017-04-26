@@ -5,15 +5,33 @@ function DAO_Data(db,id){
         this.get(id,this.erase);
     }
 
-    this.erase = function (err,dao) {
+    this.regen = function (err,dao) {
+
+        var dao_tmp = new DAO_Data(this.db);
+
         if (!err) {
-            this.log_datetime = dao.log_datetime;
-            this.id = dao.id;
-            this.topic = dao.topic;
-            this.user = dao.user;
-            this.type = dao.type;
-            this.value = dao.value;
+            dao_tmp.log_datetime = dao.log_datetime;
+            dao_tmp.id = dao.id;
+            dao_tmp.topic = dao.topic;
+            dao_tmp.user = dao.user;
+            dao_tmp.type = dao.type;
+            dao_tmp.value = dao.value;
+            if (dao_tmp.type == 'complexe') {
+                for (label in dao_tmp.value) {
+                    dao_tmp.value[label]=this.regen(null,dao_tmp.value[label]);
+                }
+            }
+            if (dao_tmp.type == 'model') {
+                for (label in dao_tmp.value) {
+                    for (i in dao_tmp.value[label]) {
+                        dao_tmp.value[label][i]=this.regen(null,dao_tmp.value[label][i]);
+                    }
+                    dao_tmp.value[label]=this.regen(null,dao_tmp.value[label]);
+                }
+            }
         }
+
+        return dao_tmp;
     }
 
     this.create = function (topic,user,type,value,callback) {
@@ -43,7 +61,7 @@ function DAO_Data(db,id){
             keys:null,
             values:{
                 id:dao.id,
-                value:value
+                value:dao.value
             }
         });
         stmt.exec(callback);
@@ -202,6 +220,7 @@ function DAO_Data(db,id){
             values:null
         });
         if (!finalize) {
+            console.log(stmt.sql);
             stmt.exec(callback);
 
         }
