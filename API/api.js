@@ -100,16 +100,14 @@ io.on('connection', function (socket) {
 	});
     socket.on('delete', function (data) {
         if(data){
-            var tmp = new dao_data(db);
-            tmp.erase(null,data);
+            var tmp = api_dao_data.regen(null,data);
             tmp.delete(emitMessage);
         }
 
 	});
     socket.on('update', function (data) {
         if(data){
-            var tmp = new dao_data(db);
-            tmp.erase(null,data);
+            var tmp = api_dao_data.regen(null,data);
             tmp.update(emitMessage);
         }
 
