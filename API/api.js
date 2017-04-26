@@ -60,7 +60,8 @@ var db = new DB('./test.db')
 
 var dao_data = require('./dao_data.js');
 var api_dao_data = new dao_data(db);
-
+var dao_user = require('./dao_user.js');
+var api_dao_user = new dao_user(db);
 
 
 
@@ -75,7 +76,7 @@ io.on('connection', function (socket) {
         if (err) {
             data.err = data.err.toString();
         }
-        
+
     	socket.emit('data',data);
     };
 
@@ -90,6 +91,12 @@ io.on('connection', function (socket) {
             api_dao_data.get(data.id,emitMessage);
         }
 
+	});
+	socket.on('get_User', function (data) {
+		console.log('Test Users');
+        if(data){
+            api_dao_user.get(data.id,emitMessage);
+        }
 	});
     socket.on('delete', function (data) {
         if(data){

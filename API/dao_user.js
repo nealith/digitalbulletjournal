@@ -83,7 +83,7 @@ DAO_User.prototype.get_User = function(err,args){
 
 DAO_User.prototype.get = function(id,callback){
 
-    dao = new DAO_User(this.db);
+    var dao = new DAO_User(this.db);
     dao.callback = callback
     dao.lock = true;
 
