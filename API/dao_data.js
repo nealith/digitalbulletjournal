@@ -1,8 +1,39 @@
-function DAO_Data(db,id){
+function DAO_Data(db,id,topic,user,type,value){
 
     this.db = db;
     if (id) {
         this.get(id,this.erase);
+    } else {
+        this.id = null;
+        this.topic = dao.topic;
+        this.user = dao.user;
+        this.type = dao.type;
+        this.value = dao.value;
+    }
+
+    this.clone = function (dao) {
+
+        if (!dao) {
+            dao = this;
+        }
+
+        var new_dao = new DAO_Data(this.db,null,dao.topic,dao.user,dao.type,dao.value);
+
+        if (dao.type=='Complexe' || dao.type=='Model') {
+            new_dao.value = new Object;
+            for (label in dao.value) {
+                if (dao.type=='Model') {
+                    new_dao.value[label] = new Array();
+                    for (var i = 0; i < dao.value[label].length; i++) {
+                        new_dao.value[label][i] = dao.value[label][i].clone();
+                    }
+                } else {
+                    new_dao.value[label] = dao.value[label].clone();
+                }
+            }
+        }
+        return new_dao
+
     }
 
     this.regen = function (err,dao) {
@@ -34,7 +65,14 @@ function DAO_Data(db,id){
         return dao_tmp;
     }
 
-    this.create = function (topic,user,type,value,callback) {
+    this.create_dao = function(dao,callback,stmt){
+
+        this.create(dao.topic,dao.user,dao.type,dao.value,callback,stmt);
+
+    }
+
+    this.create = function (topic,user,type,value,callback,stmt) {
+        var finalize = false;
         shasum = require('shasum');
         dao = new DAO_Data(this.db);
         dao.callback = callback
@@ -44,7 +82,10 @@ function DAO_Data(db,id){
         dao.user = user;
         dao.type = type;
         dao.value = value;
-        var stmt = this.db.stmt(true);
+        if (!stmt) {
+            stmt = this.db.stmt(true);
+            finalize = true;
+        }
         stmt.insert({
             table:'Data',
             keys:null,
@@ -74,15 +115,11 @@ function DAO_Data(db,id){
                 }
             });
         }
-        stmt.exec(callback);
-
-    }
-
-    this.create_callback = function (err,args) {
-
-        if (!err) {
-            this.callback(err,this);
+        if (finalize) {
+            stmt.exec(callback);
         }
+
+
     }
 
     this.update = function (callback,stmt,finalize) {
@@ -90,10 +127,38 @@ function DAO_Data(db,id){
             stmt = this.db.stmt(true);
         }
 
+        var self = this;
+
+        if (!this.id) {
+            this.create(self,function(err,args){
+                if (!err) {
+                    self._update(callback,stmt,finalize,false);
+                }
+            },stmt);
+        } else {
+            self._update(callback,stmt,finalize,true);
+        }
+
+
+    }
+
+    this._update = function (callback,stmt,finalize,update){
         if (this.type == 'Complexe' || this.type == 'Model') {
             var labels = Object.keys(this.value);
             if (this.type == 'Complexe') {
                 for (label in this.value) {
+                    if (update) {
+                        stmt.update({
+                            table:'Data',
+                            keys:{
+                                id:this.id
+                            },
+                            values:{
+                                user:this.user
+                            }
+                        });
+                    }
+                    this.value[label].update(null,stmt,false);
                     stmt.update({
                         table:'Complexes_Data',
                         keys:{
@@ -104,12 +169,23 @@ function DAO_Data(db,id){
                             data:this.value[label].id
                         }
                     });
-                    this.value[label].update(null,stmt,false);
+
                 }
             } else { // Model
-                var Sync = require('sync');
+                if (update) {
+                    stmt.update({
+                        table:'Data',
+                        keys:{
+                            id:this.id
+                        },
+                        values:{
+                            user:this.user
+                        }
+                    });
+                }
+
                 var dao = this;
-                this.db.select.sync({
+                this.db.select({
                     table:'Models_Data',
                     keys:{
                         parent:this.id
@@ -134,7 +210,7 @@ function DAO_Data(db,id){
                             }
                             if (!is_in) {
                                 stmt.insert({
-                                    table:'Complexes_Data',
+                                    table:'Models_Data',
                                     keys:null,
                                     values:{
                                         parent:dao.id,
@@ -148,7 +224,7 @@ function DAO_Data(db,id){
                         for (var i = 0; i < ids.length; i++) {
                             if (ids[i]) {
                                 stmt.delete({
-                                    table:'Complexes_Data',
+                                    table:'Models_Data',
                                     keys:{
                                         parent:dao.id,
                                         label:label,
@@ -161,8 +237,16 @@ function DAO_Data(db,id){
                     }
                 });
             }
-        } else {
-            console.log(this);
+        } else if (update){
+            stmt.update({
+                table:'Data',
+                keys:{
+                    id:this.id
+                },
+                values:{
+                    user:this.user
+                }
+            });
             stmt.update({
                 table:'Data'+this.type+'s',
                 keys:{
@@ -342,6 +426,28 @@ function DAO_Data(db,id){
                 keys:null,
                 values:null
             },callback);
+        }
+    }
+
+    this.get_all_topic = function (topic,type,callback) {
+        if(topic){
+            if (type) {
+                this.db.select({
+                    table:'Data',
+                    keys:{
+                        topic:topic
+                    },
+                    values:null
+                },callback);
+            } else {
+                this.db.select({
+                    table:'Data'+type+'s',
+                    keys:{
+                        topic:topic
+                    },
+                    values:null
+                },callback);
+            }
         }
     }
 
