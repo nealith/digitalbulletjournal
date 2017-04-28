@@ -1,4 +1,4 @@
-var sqliteDB = function(database){
+var SQLITE_DB = function(database){
 
     var DB_UTILS = require('./libdbj_db_utils.js');
     this.utils = new DB_UTILS();
@@ -7,30 +7,30 @@ var sqliteDB = function(database){
     this.DB_TRANSACTION_STATEMENT = require('./libdbj_db_stmt.js');
 }
 
-sqliteDB.prototype.insert = function(args,callback){
+SQLITE_DB.prototype.insert = function(args,callback){
     var query = this.utils.create(args);
     this.db.run(query.sql,query.params,callback);
 }
-sqliteDB.prototype.update = function(args,callback){
+SQLITE_DB.prototype.update = function(args,callback){
     var query = this.utils.update(args);
     this.db.run(query.sql,query.params,callback);
 }
-sqliteDB.prototype.delete = function(args,callback){
+SQLITE_DB.prototype.delete = function(args,callback){
     var query = this.utils.delete(args);
     this.db.run(query.sql,query.params,callback);
 }
-sqliteDB.prototype.select = function(args,callback){
+SQLITE_DB.prototype.select = function(args,callback){
     var query = this.utils.select(args);
     this.db.all(query.sql,query.params,callback);
 }
 
-sqliteDB.prototype.select_all = function(args,callback){
+SQLITE_DB.prototype.select_all = function(args,callback){
     var query = this.utils.select_all(args);
     this.db.all(query.sql,query.params,callback);
 }
 
-sqliteDB.prototype.stmt = function(transaction){
+SQLITE_DB.prototype.stmt = function(transaction){
     return new this.DB_TRANSACTION_STATEMENT(this.db,this.utils,transaction);
 }
 
-module.exports = sqliteDB;
+module.exports = SQLITE_DB;
