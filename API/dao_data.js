@@ -329,16 +329,20 @@ function DAO_Data(db,id){
         });
     }
 
-
-
-
-
-    this.get_all_type = function (callback) {
-
-    }
-
-    this.get_all_data = function (callback) {
-
+    this.get_all = function (type,callback) {
+        if (type) {
+            this.db.select_all({
+                table:'Data',
+                keys:null,
+                values:null
+            },callback);
+        } else {
+            this.db.select_all({
+                table:'Data'+type+'s',
+                keys:null,
+                values:null
+            },callback);
+        }
     }
 
 }
