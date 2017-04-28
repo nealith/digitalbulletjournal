@@ -5,10 +5,10 @@ function DAO_Data(db,id,topic,user,type,value){
         this.get(id,this.erase);
     } else {
         this.id = null;
-        this.topic = dao.topic;
-        this.user = dao.user;
-        this.type = dao.type;
-        this.value = dao.value;
+        this.topic = topic;
+        this.user = user;
+        this.type = type;
+        this.value = value;
     }
 
     this.clone = function (dao) {
