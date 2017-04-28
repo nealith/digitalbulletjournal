@@ -55,19 +55,20 @@ DB_UTILS.prototype.delete = function (args) {
     var attr_keys_size = attr_keys.length;
     var i = 1;
     var keys_query = '';
-    var keys = new Object();
-    for (attr_key in args.values) {
+    var keys_values = new Object();
+    for (attr_key in args.keys) {
         if (i == attr_keys_size) {
             keys_query += (attr_key+' = $'+attr_key);
-            keys['$'+attr_key] = args.keys[attr_key];
+            keys_values['$'+attr_key] = args.keys[attr_key];
         } else {
             keys_query += (attr_key+' = $'+attr_key+' AND ');
-            keys['$'+attr_key] = args.keys[attr_key];
+            keys_values['$'+attr_key] = args.keys[attr_key];
         }
         i++;
     }
     query.sql += (keys_query+';');
-    query.params = keys;
+    query.params = keys_values;
+    console.log(query);
     return query;
 };
 
@@ -96,11 +97,11 @@ DB_UTILS.prototype.update = function (args) {
     var values_query = '';
     for (attr_value in args.values) {
         if (k == attr_values_size) {
-            values_query += (value+' = $'+value);
-            keys_values['$'+value] = args.values[value];
+            values_query += (attr_value+' = $'+attr_value);
+            keys_values['$'+attr_value] = args.values[attr_value];
         } else {
-            values_query += (value+' = $'+value+',');
-            keys_values['$'+value] = args.values[value];
+            values_query += (attr_value+' = $'+attr_value+',');
+            keys_values['$'+attr_value] = args.values[attr_value];
         }
         k++;
     }
@@ -133,6 +134,13 @@ DB_UTILS.prototype.select = function (args) {
     query.params = keys;
     return query;
 };
+
+DB_UTILS.prototype.select_all = function(args){
+    var query = new Object();
+    query.sql = 'SELECT * FROM '+args.table+'; ';
+    query.params = null;
+    return query;
+}
 
 DB_UTILS.prototype.to_sql = function(args){
     var sql = new String(args.sql);
