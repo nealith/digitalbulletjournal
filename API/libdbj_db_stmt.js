@@ -1,5 +1,4 @@
 var DB_TRANSACTION_STATEMENT = function(db,utils,transaction){
-
     this.db = db;
     this.utils = utils;
     this.sql = '';
@@ -9,7 +8,6 @@ var DB_TRANSACTION_STATEMENT = function(db,utils,transaction){
     if (transaction) {
         this.sql+='BEGIN TRANSACTION;'
     }
-
 }
 
 DB_TRANSACTION_STATEMENT.prototype.insert = function (args) {
@@ -64,15 +62,7 @@ DB_TRANSACTION_STATEMENT.prototype.exec = function (callback) {
         } else {
             this.db.exec(this.sql,this.callback);
         }
-
     }
-}
-DB_TRANSACTION_STATEMENT.prototype.finalize = function (err,args) {
-    console.log(this.stmt.lock);
-    console.log(this.stmt.callback);
-    console.log(this.stmt.db);
-    console.log(err);
-
 }
 
 module.exports = DB_TRANSACTION_STATEMENT;
