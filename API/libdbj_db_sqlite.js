@@ -21,7 +21,11 @@ sqliteDB.prototype.delete = function(args,callback){
 }
 sqliteDB.prototype.select = function(args,callback){
     var query = this.utils.select(args);
-    console.log(query);
+    this.db.all(query.sql,query.params,callback);
+}
+
+sqliteDB.prototype.select_all = function(args,callback){
+    var query = this.utils.select_all(args);
     this.db.all(query.sql,query.params,callback);
 }
 
