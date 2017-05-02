@@ -132,7 +132,7 @@ DAO_DATA.prototype.update = function (callback,stmt,finalize) {
 
     var self = this;
 
-    if (!this.id) {
+    if (!this.id) { // If id is null, create the data
         this.create(self,function(err,args){
             if (!err) {
                 self._update(callback,stmt,finalize,false);
@@ -145,140 +145,12 @@ DAO_DATA.prototype.update = function (callback,stmt,finalize) {
 
 }
 
+
+// Should not be called by externs
 DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
-    if (this.type == 'Complexe' || this.type == 'Model') {
-        var labels = Object.keys(this.value);
-        if (this.type == 'Complexe') {
-            for (label in this.value) {
-                if (update) {
-                    stmt.update({
-                        table:'Data',
-                        keys:{
-                            id:this.id
-                        },
-                        values:{
-                            user:this.user
-                        }
-                    });
-                    stmt.update({
-                        table:'Complexes_Data',
-                        keys:{
-                            parent:this.id,
-                            label:label
-                        },
-                        values:{
-                            data:this.value[label].id
-                        }
-                    });
-                } else {
-                    stmt.insert({
-                        table:'Complexes_Data',
-                        keys:null,
-                        values:{
-                            parent:this.id,
-                            label:label,
-                            data:this.value[label].id
-                        }
-                    });
-                }
-                this.value[label].update(null,stmt,false);
-
-
-            }
-            if (!finalize) {
-                stmt.exec(callback);
-
-            }
-        } else { // Model
-            if (update) {
-                stmt.update({
-                    table:'Data',
-                    keys:{
-                        id:this.id
-                    },
-                    values:{
-                        user:this.user
-                    }
-                });
-            }
-
-            var dao = this;
-            this.db.select({
-                table:'Models_Data',
-                keys:{
-                    parent:this.id
-                },
-                values:null
-            },function(err,args){
-                for (label in dao.value) {
-                    var ids = new Array()
-                    for (var i = 0; i < results.length; i++) {
-                        if (args[i].label == label) {
-                            ids.push(args[i].id);
-                        }
-                    }
-                    var l = 0;
-                    var recursif_callback_update (err,args) {
-                        if (!err) {
-                            if (l < dao.value[label].length - 1) {
-                                l++;
-                                dao.value[label][l].update(function(err,args){
-                                    if (!err) {
-                                        var is_in = false;
-                                        for (var k = 0; (k < ids.length && !is_in); k++) {
-                                            if(ids[k] == dao.value[label][i].id){
-                                                is_in = true;
-                                                ids[k] == null;
-                                            }
-                                        }
-                                        if (!is_in) {
-                                            stmt.insert({
-                                                table:'Models_Data',
-                                                keys:null,
-                                                values:{
-                                                    parent:dao.id,
-                                                    label:label,
-                                                    data:dao.value[label][i].id
-                                                }
-                                            });
-                                        }
-                                        recursif_callback_update(null,null);
-                                    } else {
-                                        callback(err,args);
-                                    }
-                                },stmt,false);
-
-                            } else {
-                                for (var i = 0; i < ids.length; i++) {
-                                    if (ids[i]) {
-                                        stmt.delete({
-                                            table:'Models_Data',
-                                            keys:{
-                                                parent:dao.id,
-                                                label:label,
-                                                data:ids[i]
-                                            },
-                                            values:null
-                                        });
-                                    }
-                                }
-                                if (!finalize) {
-                                    stmt.exec(callback);
-
-                                }
-                            }
-                        } else {
-                            callback(err,args);
-                        }
-
-
-                    }
-                    dao.value[label][i].update(null,stmt,false);
-
-                }
-            });
-        }
-    } else if (update){
+    // 1 - If the object is already in database :
+    //  update user in Data (with id of object as key),
+    if (update) {
         stmt.update({
             table:'Data',
             keys:{
@@ -288,6 +160,160 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                 user:this.user
             }
         });
+    }
+    if (this.type == 'Complexe') {
+
+
+        // 2 - Else : create the object in databse (see update()) and (here) insert it in Complexes_Data as new connection
+        // 3 - Finish by calling sub-object update()
+        // At the end, finalize statement if finalize param is true
+
+
+        for (label in this.value) {
+            // 2 - For all sub-object, call update
+            this.value[label].update(null,stmt,false);
+            // 3 - If object already in database, update relations in Complexes_Data (update the id of sub-object (know as 'data'))
+            if (update) {
+                stmt.update({
+                    table:'Complexes_Data',
+                    keys:{
+                        parent:this.id,
+                        label:label
+                    },
+                    values:{
+                        data:this.value[label].id
+                    }
+                });
+            } else {
+                // 3 bis - If object were not present in database, all relation in Complexes_Data don't exist yet, so we add them
+                stmt.insert({
+                    table:'Complexes_Data',
+                    keys:null,
+                    values:{
+                        parent:this.id,
+                        label:label,
+                        data:this.value[label].id
+                    }
+                });
+            }
+        }
+        // 4 - if finalize, execute the treatement
+        if (!finalize) {
+            stmt.exec(callback);
+
+        }
+    } else if(this.type == 'Model') { // Model
+
+        var dao = this;
+
+        // 2 - we ask for all knowed relation with the object in Models_Data
+
+        this.db.select({
+            table:'Models_Data',
+            keys:{
+                parent:this.id
+            },
+            values:null
+        },function(err,args){
+            if (!err) {
+                // Because we (may) have async call (in sub object calling) but need to do all things as sync traitement, we will use a recursive function to treate all avaibles values of all labels of the object
+
+                var labels = Object.keys(dao.value);
+                var m = 0 // label
+                var n = 0 // avaible value for a label m
+                var label = labels[m];
+                var ids = new Array();
+                for (var i = 0; i < results.length; i++) {
+                    if (args[i].label == label) {
+                        ids.push(args[i].id);
+                    }
+                }
+
+                var recursif_callback_update(err,args){
+                    if (!err) {
+                        label = labels[m];
+
+                        // 3 - for the label m
+
+                        if (n = labels[m].length) {
+                            // At the end of update of all values for a label, look for relation (in database) to remove (cause don't still exist in new version of the model)
+
+                            for (var i = 0; i < ids.length; i++) {
+                                if (ids[i]) {
+                                    stmt.delete({
+                                        table:'Models_Data',
+                                        keys:{
+                                            parent:dao.id,
+                                            label:label,
+                                            data:ids[i]
+                                        },
+                                        values:null
+                                    });
+                                }
+                            }
+
+
+                            // Go to the next label
+                            m++;
+                            // If all label are updated, end the function
+                            if (m == labels.length) {
+                                if (!finalize) {
+                                    stmt.exec(callback);
+                                }
+                                return;
+                            }
+                            // Else continue on the next label, reset value no at 0 and get all relation id (data) link to this label
+                            n = 0;
+                            ids = new Array();
+                            for (var i = 0; i < results.length; i++) {
+                                if (args[i].label == label) {
+                                    ids.push(args[i].id);
+                                }
+                            }
+                        }
+
+                        // 4 - for value (sub-object) n in label m, look if his id exist in relation were parent if object and label is the current label m
+
+                        var is_in = false;
+                        for (var k = 0; (k < ids.length && !is_in); k++) {
+                            if(ids[k] == dao.value[label][n].id){
+                                is_in = true;
+                                ids[k] == null;
+                            }
+                        }
+
+                        // 4 bis - if does't exist, add a relation
+
+                        if (!is_in) {
+                            stmt.insert({
+                                table:'Models_Data',
+                                keys:null,
+                                values:{
+                                    parent:dao.id,
+                                    label:label,
+                                    data:dao.value[label][n].id
+                                }
+                            });
+                        }
+
+                        n++;
+
+                        // 5 - go the next value in label m
+
+                        dao.value[label][n].update(recursif_callback_update,stmt,false);
+
+                    } else {
+                        callback(err,args);
+                    }
+                }
+                // Do the first call to recursive function
+
+                dao.value[label][n].update(recursif_callback_update,stmt,false);
+            } else {
+                callback(err,args);
+            }
+        });
+    } else if (update){
         stmt.update({
             table:'Data'+this.type+'s',
             keys:{
@@ -310,37 +336,34 @@ DAO_DATA.prototype.delete = function (callback,stmt,finalize) {
     if (!stmt) {
         stmt = this.db.stmt(true);
     }
-
-    if (this.type == 'Complexe' || this.type == 'Model') {
-        var labels = Object.keys(this.value);
-        if (this.type == 'Complexe') {
-            for (label in this.value) {
+    if (this.type == 'Complexe') {
+        for (label in this.value) {
+            stmt.delete({
+                table:'Complexes_Data',
+                keys:{
+                    parent:this.id,
+                    data:this.value[label].id
+                },
+                values:null
+            });
+            this.value[label].delete(null,stmt,false);
+        }
+    } else if (this.type == 'Model') { // Model
+        for (label in this.value) {
+            for (var i = 0; i < this.value[label].length; i++) {
                 stmt.delete({
-                    table:'Complexes_Data',
+                    table:'Models_Data',
                     keys:{
                         parent:this.id,
                         data:this.value[label].id
                     },
                     values:null
                 });
-                this.value[label].delete(null,stmt,false);
-            }
-        } else { // Model
-            for (label in this.value) {
-                for (var i = 0; i < this.value[label].length; i++) {
-                    stmt.delete({
-                        table:'Models_Data',
-                        keys:{
-                            parent:this.id,
-                            data:this.value[label].id
-                        },
-                        values:null
-                    });
-                    this.value[label][i].delete(null,stmt,false);
-                }
+                this.value[label][i].delete(null,stmt,false);
             }
         }
     }
+
     stmt.delete({
         table:'Data'+this.type+'s',
         keys:{
@@ -356,7 +379,6 @@ DAO_DATA.prototype.delete = function (callback,stmt,finalize) {
         values:null
     });
     if (!finalize) {
-        console.log(stmt.sql);
         stmt.exec(callback);
 
     }
@@ -364,9 +386,8 @@ DAO_DATA.prototype.delete = function (callback,stmt,finalize) {
 
 DAO_DATA.prototype.get = function (id,callback) {
 
-    var dao = new DAO_DATA(this.db);
-    dao.lock = true;
-
+    var dao;
+    var db = this.db;
     this.db.select({
         table:'Data',
         keys:{
@@ -374,13 +395,24 @@ DAO_DATA.prototype.get = function (id,callback) {
         },
         values:null
     },function(err,args){
-        if (args) {
+        if (!err) {
+            dao = new DAO_DATA(db,null,args[0].topic,args[0].user,args[0].type,new Object());
             dao.id = args[0].id
-            dao.log_datetime = args[0].log_datetime
-            dao.topic = args[0].topic
-            dao.user = args[0].user
-            dao.type = args[0].type
             if (dao.type == 'Complexe') {
+                var rows;
+                var m = 0 // indice in rows (args);
+                var recursive_callback = function(err,args){
+                    if (!err) {
+                        dao.values[rows[m].label] = args;
+                        m++
+                        if (m = rows.length) {
+                            callback(null,dao);
+                        }
+                        dao.get(rows[m].data,recursive_callback);
+                    } else {
+                        callback(err,args);
+                    }
+                }
                 dao.db.select({
                     table:'Complexes_Data',
                     keys:{
@@ -388,21 +420,32 @@ DAO_DATA.prototype.get = function (id,callback) {
                     },
                     values:null
                 },function(err,args){
-                    if (args) {
-                        dao.value = new Object();
-                        for (row in args){
-                            dao.values[args[row].label] = new DAO_DATA(dao.db,row.data);
-
-                        }
-                        dao.lock = false;
-                        callback(null,dao);
+                    if (!err) {
+                        rows = args;
+                        dao.get(rows[m].data,recursive_callback);
                     } else {
-                        dao.lock = false;
-                        callback("this data does'nt exist in ComplexesData",null)
+                        callback(err,args)
                     }
                 });
 
             } else if (dao.type == 'Model'){
+                var rows;
+                var m = 0 // indice in rows (args);
+                var recursive_callback = function(err,args){
+                    if (!err) {
+                        if (!dao.values[rows[m].label]) {
+                            dao.values[rows[m].label] = new Array();
+                        }
+                        dao.values[rows[m].label].push(args);
+                        m++
+                        if (m = rows.length) {
+                            callback(null,dao);
+                        }
+                        dao.get(rows[m].data,recursive_callback);
+                    } else {
+                        callback(err,args);
+                    }
+                }
                 dao.db.select({
                     table:'Models_Data',
                     keys:{
@@ -410,20 +453,11 @@ DAO_DATA.prototype.get = function (id,callback) {
                     },
                     values:null
                 },function(err,args){
-                    if (args) {
-                        dao.value = new Object();
-                        for (row in args){
-                            if (!dao.values[args[row].label]) {
-                                dao.values[args[row].label] = new Array();
-                            }
-                            dao.values[args[row].label].push(new DAO_DATA(dao.db,row.data));
-                        }
-                        dao.lock = false;
-                        callback(null,dao);
-
+                    if (!err) {
+                        rows = args;
+                        dao.get(rows[m].data,recursive_callback);
                     } else {
-                        dao.lock = false;
-                        callback("this data does'nt exist in ModelsData",null)
+                        callback(err,args)
                     }
                 });
 
@@ -441,16 +475,14 @@ DAO_DATA.prototype.get = function (id,callback) {
                         console.log(dao);
                         callback(null,dao);
                     } else {
-                        dao.lock = false;
-                        callback("this data does'nt exist in Specific TypeData (Text,Boolean,Number,Date)",null)
+                        callback(err,null)
                     }
                 });
             }
 
 
         } else {
-            dao.lock = false;
-            callback(err,null)
+            callback(err,args)
         }
     });
 }
