@@ -127,6 +127,7 @@ DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt) {
 DAO_DATA.prototype.update = function (callback,stmt,finalize) {
     if (!stmt) {
         stmt = this.db.stmt(true);
+        finalize = true;
     }
 
     var self = this;
@@ -159,18 +160,33 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                             user:this.user
                         }
                     });
+                    stmt.update({
+                        table:'Complexes_Data',
+                        keys:{
+                            parent:this.id,
+                            label:label
+                        },
+                        values:{
+                            data:this.value[label].id
+                        }
+                    });
+                } else {
+                    stmt.insert({
+                        table:'Complexes_Data',
+                        keys:null,
+                        values:{
+                            parent:this.id,
+                            label:label,
+                            data:this.value[label].id
+                        }
+                    });
                 }
                 this.value[label].update(null,stmt,false);
-                stmt.update({
-                    table:'Complexes_Data',
-                    keys:{
-                        parent:this.id,
-                        label:label
-                    },
-                    values:{
-                        data:this.value[label].id
-                    }
-                });
+
+
+            }
+            if (!finalize) {
+                stmt.exec(callback);
 
             }
         } else { // Model
@@ -193,49 +209,72 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                     parent:this.id
                 },
                 values:null
-            },function(){
+            },function(err,args){
                 for (label in dao.value) {
                     var ids = new Array()
                     for (var i = 0; i < results.length; i++) {
-                        if (results[i].label == label) {
-                            ids.push(results[i].id);
+                        if (args[i].label == label) {
+                            ids.push(args[i].id);
                         }
                     }
-                    for (var i = 0; i < dao.value[label].length; i++) {
+                    var l = 0;
+                    var recursif_callback_update (err,args) {
+                        if (!err) {
+                            if (l < dao.value[label].length - 1) {
+                                l++;
+                                dao.value[label][l].update(function(err,args){
+                                    if (!err) {
+                                        var is_in = false;
+                                        for (var k = 0; (k < ids.length && !is_in); k++) {
+                                            if(ids[k] == dao.value[label][i].id){
+                                                is_in = true;
+                                                ids[k] == null;
+                                            }
+                                        }
+                                        if (!is_in) {
+                                            stmt.insert({
+                                                table:'Models_Data',
+                                                keys:null,
+                                                values:{
+                                                    parent:dao.id,
+                                                    label:label,
+                                                    data:dao.value[label][i].id
+                                                }
+                                            });
+                                        }
+                                        recursif_callback_update(null,null);
+                                    } else {
+                                        callback(err,args);
+                                    }
+                                },stmt,false);
 
-                        var is_in = false;
-                        for (var k = 0; (k < ids.length && !is_in); k++) {
-                            if(ids[k] == dao.value[label][i].id){
-                                is_in = true;
-                                ids[k] == null;
-                            }
-                        }
-                        if (!is_in) {
-                            stmt.insert({
-                                table:'Models_Data',
-                                keys:null,
-                                values:{
-                                    parent:dao.id,
-                                    label:label,
-                                    data:dao.value[label][i].id
+                            } else {
+                                for (var i = 0; i < ids.length; i++) {
+                                    if (ids[i]) {
+                                        stmt.delete({
+                                            table:'Models_Data',
+                                            keys:{
+                                                parent:dao.id,
+                                                label:label,
+                                                data:ids[i]
+                                            },
+                                            values:null
+                                        });
+                                    }
                                 }
-                            });
+                                if (!finalize) {
+                                    stmt.exec(callback);
+
+                                }
+                            }
+                        } else {
+                            callback(err,args);
                         }
-                        dao.value[label][i].update(null,stmt,false);
+
+
                     }
-                    for (var i = 0; i < ids.length; i++) {
-                        if (ids[i]) {
-                            stmt.delete({
-                                table:'Models_Data',
-                                keys:{
-                                    parent:dao.id,
-                                    label:label,
-                                    data:ids[i]
-                                },
-                                values:null
-                            });
-                        }
-                    }
+                    dao.value[label][i].update(null,stmt,false);
+
                 }
             });
         }
@@ -258,12 +297,13 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                 value:this.value
             }
         });
+        if (!finalize) {
+            stmt.exec(callback);
+
+        }
 
     }
-    if (!finalize) {
-        stmt.exec(callback);
 
-    }
 }
 
 DAO_DATA.prototype.delete = function (callback,stmt,finalize) {
