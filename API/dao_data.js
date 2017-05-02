@@ -198,7 +198,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
             }
         }
         // 4 - if finalize, execute the treatement
-        if (!finalize) {
+        if (finalize) {
             stmt.exec(callback);
 
         }
@@ -257,7 +257,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                             m++;
                             // If all label are updated, end the function
                             if (m == labels.length) {
-                                if (!finalize) {
+                                if (finalize) {
                                     stmt.exec(callback);
                                 }
                                 return;
@@ -323,7 +323,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                 value:this.value
             }
         });
-        if (!finalize) {
+        if (finalize) {
             stmt.exec(callback);
 
         }
@@ -335,6 +335,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
 DAO_DATA.prototype.delete = function (callback,stmt,finalize) {
     if (!stmt) {
         stmt = this.db.stmt(true);
+        finalize = true;
     }
     if (this.type == 'Complexe') {
         for (label in this.value) {
@@ -378,7 +379,7 @@ DAO_DATA.prototype.delete = function (callback,stmt,finalize) {
         },
         values:null
     });
-    if (!finalize) {
+    if (finalize) {
         stmt.exec(callback);
 
     }
