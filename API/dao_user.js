@@ -1,4 +1,4 @@
-var DAO_USER = function(db,id,first_name,password,nick_name,last_name,e_mail){
+var DAO_USER = function(db,id,password,first_name,last_name,nick_name,e_mail){
 
     this.db = db;
     if(id){
@@ -97,7 +97,6 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
 
     var DAO_LOG = require('./dao_log.js');
     var DAO_LOG_USER = require('./dao_log_user.js');
-    var DAO_LOG_TOPIC = require('./dao_topic.js');
 
     var dao_log = new DAO_LOG();
     var dao_log_user = new DAO_LOG_USER();
@@ -107,62 +106,63 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
 
     var dao_logs;
     var dao_logs_users;
-    dao_log.get_all_user(self.id,function(err,args){
-        dao_logs = args;
 
-        var recursif_callback_delete_log = function(err,args){
-            if (!err) {
-                if (l < dao_logs.length) {
-                    l++;
-                    dao_logs[l].delete(recursif_callback_delete_log,stmt,false)
-                } else {
-                    if (finalize) {
-                        stmt.exec(callback);
+    // Steps :
+    // 1 - Remove all logs of the user (they will remove them self in logs_users)
+    // 2 - In Logs_Users, remove all relation including the user
+
+    var m = 0 // indice in dao_logs
+    var n = 0 // indice in dao_logs_users
+
+    var recursive_callback_delete_logs = function(err,args){
+        if (!err) {
+            m++;
+            if (m == dao_logs.length) {
+                dao_log_user.get_all_user(self.id,function(err,args){
+                    if (!err) {
+                        dao_logs_users = args
+                        dao_logs_users[n].delete(recursive_callback_delete_user_relations,stmt,false);
+                    } else {
+                        callback(err,args);
                     }
-                }
+                });
             } else {
-                callback(err,args);
+                dao_logs[m].delete(recursive_callback_delete_logs,stmt,false);
             }
+        } else {
+            callback(err,args);
         }
+    }
 
-        var recursif_callback_get_log = function(err,args){
-            if (!err) {
-                if (i < dao_logs.length) {
-                    dao_logs_users = dao_logs_users.concat(args);
-                    i++; dao_log_user.get_all_log(dao_logs[i].id,recursif_callback_get_log);
-                } else {
-                    dao_log_user.get_all_user(self.id,function(err,args){
-                        if (!err) {
-                            dao_logs_users = dao_logs_users.concat(args)
-                            for (var k = 0; k < array.length; k++) {
-                                dao_log_user[k].delete(null,stmt,false);
-                            }
-                        } else {
-                            callback(err,args);
-                        }
-                    });
-                }
+    var recursive_callback_delete_user_relations = function(err,args){
+        if (!err) {
+            n++
+            if (n == dao_logs_users.length) {
+                callback(err,args);
             } else {
-                callback(err,args);
+                dao_logs_users[n].delete(recursive_callback_delete_user_relations,stmt,false);
             }
-
-
+        } else {
+            callback(err,args);
         }
+    }
 
-        dao_log_user.get_all_log(dao_logs[i].id,recursif_callback_get_log);
+    dao_log.get_all_user(self.id,function(err,args){
+        if (!err) {
+            dao_logs = args
+            dao_logs[m].delete(recursive_callback_delete_logs,stmt,stmt,false);
+        } else {
+            callback(err,args);
+        }
     });
-
-
-
 }
 
 
 
 DAO_USER.prototype.get = function(id,callback){
 
-    var dao = new DAO_USER(this.db);
-    dao.callback = callback
-    dao.lock = true;
+    var dao;
+    var db = this.db;
 
     this.db.select({
         table:'Users',
@@ -171,17 +171,12 @@ DAO_USER.prototype.get = function(id,callback){
         },
         values:null
     },function(err,args){
-        if(args){
+        if(!err){
+            dao = new DAO_USER(db,null,args[0].password,args[0].first_name,args[0].last_name,args[0].nick_name,args[0].e_mail);
             dao.id = args[0].id;
-            dao.first_name = args[0].first_name;
-            dao.last_name = args[0].last_name;
-            dao.nick_name = args[0].nick_name;
-            dao.creation_date = args[0].creation_date;
-            dao.e_mail = args[0].e_mail;
-            callback(null,dao);
+            callback(err,dao);
         }else{
-            dao.lock = false;
-            callback(err,null)
+            callback(err,args)
         }
     });
 
