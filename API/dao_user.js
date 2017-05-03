@@ -2,7 +2,18 @@ var DAO_USER = function(db,id,password,first_name,last_name,nick_name,e_mail){
 
     this.db = db;
     if(id){
-        this.get(id,this.erase);
+        var self = this;
+        this.get(id,function(err,args){
+            if (!err) {
+                self.id = args.id;
+                self.first_name = args.first_name;
+                self.password = args.password;
+                self.nick_name = args.nick_name;
+                self.last_name = args.last_name;
+                self.e_mail = args.e_mail;
+                self.creation_date = args.creation_date;
+            }
+        });
     } else {
         this.id = null;
         this.first_name = first_name;
@@ -14,27 +25,21 @@ var DAO_USER = function(db,id,password,first_name,last_name,nick_name,e_mail){
 
 }
 
-DAO_USER.prototype.erase = function (err,dao) {
-    if (!err) {
-        this.id = this.id;
-        this.first_name = dao.first_name;
-        this.last_name = dao.last_name;
-        this.nick_name = dao.nick_name;
-        this.creation_date = dao.creation_date;
-        this.e_mail = dao.e_mail;
-    }
+DAO_USER.prototype.regen = function (dao) {
+
+    var dao_tmp = new DAO_DATA(this.db,null,dao.password,dao.first_name,dao.last_name,dao.nick_name,dao.e_mail);
+    dao_tmp.creation_date = dao.creation_date;
+    dao_tmp.id = dao.id;
+
+    return dao_tmp;
 }
 
 DAO_USER.prototype.create = function(first_name,password,nick_name,last_name,e_mail,callback,stmt){
-
-    dao = new DAO_USER(this.db);
-    dao.callback = callback;
+    shasum = require('shasum');
+    dao = new DAO_DATA(this.db,null,dao.password,dao.first_name,dao.last_name,dao.nick_name,dao.e_mail);
     dao.creation_date = Date.now();
-    dao.first_name = first_name;
-    dao.last_name = last_name;
-    dao.nick_name = nick_name;
-    dao.password = password;
-    dao.e_mail = e_mail;
+    dao.id = shasum(dao.first_name
+dao.last_name,dao.creation_date);
     if (!stmt) {
         stmt = this.db.stmt(true);
         finalize = true;

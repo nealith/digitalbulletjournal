@@ -2,7 +2,17 @@ function DAO_DATA(db,id,topic,user,type,value){
 
     this.db = db;
     if (id) {
-        this.get(id,this.erase);
+        var self = this;
+        this.get(id,function(err,args){
+            if (!err) {
+                self.id = args.id;
+                self.topic = args.topic;
+                self.user = args.user;
+                self.type = args.type;
+                self.value = args.value;
+                self.log_datetime = args.log_datetime;
+            }
+        });
     } else {
         this.id = null;
         this.topic = topic;
@@ -38,31 +48,25 @@ DAO_DATA.prototype.clone = function (dao) {
 
 }
 
-DAO_DATA.prototype.regen = function (err,dao) {
+DAO_DATA.prototype.regen = function (dao) {
 
-    var dao_tmp = new DAO_DATA(this.db);
-
-    if (!err) {
-        dao_tmp.log_datetime = dao.log_datetime;
-        dao_tmp.id = dao.id;
-        dao_tmp.topic = dao.topic;
-        dao_tmp.user = dao.user;
-        dao_tmp.type = dao.type;
-        dao_tmp.value = dao.value;
-        if (dao_tmp.type == 'complexe') {
-            for (label in dao_tmp.value) {
-                dao_tmp.value[label]=this.regen(null,dao_tmp.value[label]);
-            }
-        }
-        if (dao_tmp.type == 'model') {
-            for (label in dao_tmp.value) {
-                for (i in dao_tmp.value[label]) {
-                    dao_tmp.value[label][i]=this.regen(null,dao_tmp.value[label][i]);
-                }
-                dao_tmp.value[label]=this.regen(null,dao_tmp.value[label]);
-            }
+    var dao_tmp = new DAO_DATA(this.db,null,dao.topic,dao.user,dao.type,dao.value);
+    dao_tmp.log_datetime = dao.log_datetime;
+    dao_tmp.id = dao.id;
+    if (dao_tmp.type == 'complexe') {
+        for (label in dao_tmp.value) {
+            dao_tmp.value[label]=this.regen(null,dao_tmp.value[label]);
         }
     }
+    if (dao_tmp.type == 'model') {
+        for (label in dao_tmp.value) {
+            for (i in dao_tmp.value[label]) {
+                dao_tmp.value[label][i]=this.regen(null,dao_tmp.value[label][i]);
+            }
+            dao_tmp.value[label]=this.regen(null,dao_tmp.value[label]);
+        }
+    }
+
 
     return dao_tmp;
 }
@@ -76,14 +80,9 @@ DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
 DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt) {
     var finalize = false;
     shasum = require('shasum');
-    dao = new DAO_DATA(this.db);
-    dao.callback = callback
+    dao = new DAO_DATA(this.db,null,topic,user,type,value);
     dao.log_datetime = Date.now();
     dao.id = shasum(topic+user+dao.log_datetime)
-    dao.topic = topic;
-    dao.user = user;
-    dao.type = type;
-    dao.value = value;
     if (!stmt) {
         stmt = this.db.stmt(true);
         finalize = true;
