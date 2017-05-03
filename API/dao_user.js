@@ -102,8 +102,8 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
     var DAO_LOG = require('./dao_log.js');
     var DAO_LOG_USER = require('./dao_log_user.js');
 
-    var dao_log = new DAO_LOG();
-    var dao_log_user = new DAO_LOG_USER();
+    var dao_log = new DAO_LOG(self.db);
+    var dao_log_user = new DAO_LOG_USER(self.db);
 
     var dao_logs;
     var dao_logs_users;

@@ -65,7 +65,7 @@ DAO_LOG.prototype.create = function(privacy,owner,title,callback,stmt){
     dao.title_avaible(dao.owner,dao.title,function(err,args){
         if (!err) {
             stmt.insert({
-                table:'Users',
+                table:'Logs',
                 keys:null,
                 values:{
                     creation_date:dao.creation_date,
@@ -94,12 +94,15 @@ DAO_LOG.prototype.update = function(callback,stmt,finalize){
     }
     if (!this.id) {
         this.create(this,callback,stmt);
+        if (finalize) {
+            stmt.exec(callback);
+        }
     } else {
         self = this;
         self.title_avaible(self.owner,self.title,function(err,args){
             if (!err) {
                 stmt.update({
-                    table:'Users',
+                    table:'Logs',
                     keys:{
                         id:self.id
                     },
@@ -117,9 +120,6 @@ DAO_LOG.prototype.update = function(callback,stmt,finalize){
             }
         })
     }
-    if (finalize) {
-        stmt.exec(callback);
-    }
 
 
 }
@@ -136,8 +136,8 @@ DAO_LOG.prototype.delete = function(callback,stmt,finalize){
     var DAO_TOPIC = require('./dao_log.js');
     var DAO_LOG_USER = require('./dao_log_user.js');
 
-    var dao_topic = new DAO_TOPIC();
-    var dao_log_user = new DAO_LOG_USER();
+    var dao_topic = new DAO_TOPIC(self.db);
+    var dao_log_user = new DAO_LOG_USER(self.db);
 
     var dao_topics;
     var dao_logs_users;
