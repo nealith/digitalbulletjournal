@@ -38,8 +38,7 @@ DAO_USER.prototype.create = function(first_name,password,nick_name,last_name,e_m
     shasum = require('shasum');
     dao = new DAO_DATA(this.db,null,dao.password,dao.first_name,dao.last_name,dao.nick_name,dao.e_mail);
     dao.creation_date = Date.now();
-    dao.id = shasum(dao.first_name
-dao.last_name,dao.creation_date);
+    dao.id = shasum(dao.first_name,dao.last_name,dao.creation_date);
     if (!stmt) {
         stmt = this.db.stmt(true);
         finalize = true;
@@ -71,7 +70,7 @@ DAO_USER.prototype.update = function(callback,stmt,finalize){
         this.create(this,callback,stmt);
     } else {
         stmt.update({
-            table:'Data',
+            table:'Users',
             keys:{
                 id:this.id
             },
@@ -105,9 +104,6 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
 
     var dao_log = new DAO_LOG();
     var dao_log_user = new DAO_LOG_USER();
-
-    var i = 0;
-    var l = 0;
 
     var dao_logs;
     var dao_logs_users;
@@ -143,7 +139,16 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
         if (!err) {
             n++
             if (n == dao_logs_users.length) {
-                callback(err,args);
+                stmt.delete({
+                    table:'Users',
+                    keys:{
+                        id:this.id
+                    },
+                    values:null
+                });
+                if (finalize) {
+                    stmt.exec(callback);
+                }
             } else {
                 dao_logs_users[n].delete(recursive_callback_delete_user_relations,stmt,false);
             }
@@ -155,7 +160,7 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
     dao_log.get_all_user(self.id,function(err,args){
         if (!err) {
             dao_logs = args
-            dao_logs[m].delete(recursive_callback_delete_logs,stmt,stmt,false);
+            dao_logs[m].delete(recursive_callback_delete_logs,stmt,false);
         } else {
             callback(err,args);
         }
