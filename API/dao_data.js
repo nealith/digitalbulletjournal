@@ -507,7 +507,7 @@ DAO_DATA.prototype.get_all_topic = function (topic,type,callback) {
     if(topic){
         if (type) {
             this.db.select({
-                table:'Data',
+                table:'Data'+type+'s',
                 keys:{
                     topic:topic
                 },
@@ -515,7 +515,7 @@ DAO_DATA.prototype.get_all_topic = function (topic,type,callback) {
             },callback);
         } else {
             this.db.select({
-                table:'Data'+type+'s',
+                table:'Data',
                 keys:{
                     topic:topic
                 },
