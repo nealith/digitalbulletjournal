@@ -35,10 +35,15 @@ DAO_DATA.prototype.clone = function (dao) {
         new_dao.value = new Object;
         for (label in dao.value) {
             if (dao.type=='Model') {
-                new_dao.value[label] = new Array();
-                for (var i = 0; i < dao.value[label].length; i++) {
-                    new_dao.value[label][i] = dao.value[label][i].clone();
+                if (dao.value[label] instanceof Array) {
+                    new_dao.value[label] = new Array();
+                    for (var i = 0; i < dao.value[label].length; i++) {
+                        new_dao.value[label][i] = dao.value[label][i].clone();
+                    }
+                } else {
+                    new_dao.value[label] = dao.value[label];
                 }
+
             } else {
                 new_dao.value[label] = dao.value[label].clone();
             }
@@ -60,10 +65,11 @@ DAO_DATA.prototype.regen = function (dao) {
     }
     if (dao_tmp.type == 'model') {
         for (label in dao_tmp.value) {
-            for (i in dao_tmp.value[label]) {
-                dao_tmp.value[label][i]=this.regen(null,dao_tmp.value[label][i]);
+            if (dao.value[label] instanceof Array) {
+                for (i in dao_tmp.value[label]) {
+                    dao_tmp.value[label][i]=this.regen(null,dao_tmp.value[label][i]);
+                }
             }
-            dao_tmp.value[label]=this.regen(null,dao_tmp.value[label]);
         }
     }
 
@@ -169,6 +175,10 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
 
 
         for (label in this.value) {
+            if (dao.value[label].id == this.id) {
+                callback('Cycle detected at label '+label,null);
+                return;
+            }
             // 2 - For all sub-object, call update
             this.value[label].update(null,stmt,false);
             // 3 - If object already in database, update relations in Complexes_Data (update the id of sub-object (know as 'data'))
@@ -217,11 +227,42 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
             if (!err) {
                 // Because we (may) have async call (in sub object calling) but need to do all things as sync traitement, we will use a recursive function to treate all avaibles values of all labels of the object
 
-                var labels = Object.keys(dao.value);
+                var labels = new Array();
                 var m = 0 // label
                 var n = 0 // avaible value for a label m
                 var label = labels[m];
                 var ids = new Array();
+
+                for lab in dao.value {
+                    if (dao.value[lab] instanceof Array()) {
+                        labels.push(lab);
+                        for (var i = 0; i < dao.value[lab].length; i++) {
+                            // DETECTION OF CYCLE WITH DAO ID
+                            if (dao.value[lab][i].id == dao.id) {
+                                callback('Cycle detected at label '+lab,null);
+                                return;
+                            }
+                        }
+                    } else {
+                        // DETECTION OF CYCLE WITH DAO ID
+                        if (dao.value[lab] == dao.id) {
+                            callback('Cycle detected at label '+lab,null);
+                            return;
+                        }
+                        stmt.update({
+                            table:'Models_Data',
+                            keys:{
+                                parent:dao.id,
+                                label:lab
+                            },
+                            values:{
+                                data:dao.value[lab]
+                            }
+                        });
+                    }
+                }
+
+
                 for (var i = 0; i < results.length; i++) {
                     if (args[i].label == label) {
                         ids.push(args[i].id);
@@ -254,6 +295,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
 
                             // Go to the next label
                             m++;
+                            label = labels[m];
                             // If all label are updated, end the function
                             if (m == labels.length) {
                                 if (finalize) {
@@ -263,12 +305,14 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                             }
                             // Else continue on the next label, reset value no at 0 and get all relation id (data) link to this label
                             n = 0;
+
                             ids = new Array();
                             for (var i = 0; i < results.length; i++) {
                                 if (args[i].label == label) {
                                     ids.push(args[i].id);
                                 }
                             }
+
                         }
 
                         // 4 - for value (sub-object) n in label m, look if his id exist in relation were parent if object and label is the current label m
@@ -350,17 +394,31 @@ DAO_DATA.prototype.delete = function (callback,stmt,finalize) {
         }
     } else if (this.type == 'Model') { // Model
         for (label in this.value) {
-            for (var i = 0; i < this.value[label].length; i++) {
+            if (this.value[label] instanceof Array) {
+                for (var i = 0; i < this.value[label].length; i++) {
+                    stmt.delete({
+                        table:'Models_Data',
+                        keys:{
+                            parent:this.id,
+                            label:label,
+                            data:this.value[label][i].id
+                        },
+                        values:null
+                    });
+                    this.value[label][i].delete(null,stmt,false);
+                }
+            } else {
                 stmt.delete({
                     table:'Models_Data',
                     keys:{
                         parent:this.id,
-                        data:this.value[label].id
+                        label:label,
+                        data:this.value[label]
                     },
                     values:null
                 });
-                this.value[label][i].delete(null,stmt,false);
             }
+
         }
     }
 
@@ -437,7 +495,7 @@ DAO_DATA.prototype.get = function (id,callback) {
                             dao.values[rows[m].label] = new Array();
                         }
                         dao.values[rows[m].label].push(args);
-                        m++
+                        m++;
                         if (m = rows.length) {
                             callback(null,dao);
                         }
@@ -454,7 +512,15 @@ DAO_DATA.prototype.get = function (id,callback) {
                     values:null
                 },function(err,args){
                     if (!err) {
-                        rows = args;
+                        rows = new Array();
+                        for (var i = 0; i < args.length; i++) {
+
+                            if args[i].data ==('Text'  || args[i].data == 'Date'  || args[i].data == 'Boolean'  || args[i].data == 'Number'  || args[i].data == 'Complexe'  || args[i].data == 'Model') {
+                                dao.values[args[i].label]=args[i].data
+                            } else {
+                                rows.push(args[]);
+                            }
+                        }
                         dao.get(rows[m].data,recursive_callback);
                     } else {
                         callback(err,args)
