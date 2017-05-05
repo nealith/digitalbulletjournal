@@ -51,7 +51,11 @@ DAO_TOPIC.prototype.title_avaible = function(log,title,callback){
 
 }
 
-DAO_TOPIC.prototype.create = function(privacy,log,title,callback,stmt){
+DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
+    this.create(dao.log, dao.title, callback, stmt);
+}
+
+DAO_TOPIC.prototype.create = function(log,title,callback,stmt){
     shasum = require('shasum');
     dao = new DAO_DATA(this.db,null,dao.log,dao.title);
     dao.creation_date = Date.now();

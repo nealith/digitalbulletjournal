@@ -34,6 +34,10 @@ DAO_USER.prototype.regen = function (dao) {
     return dao_tmp;
 }
 
+DAO_USER.prototype.create_dao = function(dao,callback,stmt){
+    this.create(dao.first_name, dao.password, dao.nick_name, dao.last_name, dao.e_mail, callback,stmt);
+}
+
 DAO_USER.prototype.create = function(first_name,password,nick_name,last_name,e_mail,callback,stmt){
     shasum = require('shasum');
     dao = new DAO_DATA(this.db,null,dao.password,dao.first_name,dao.last_name,dao.nick_name,dao.e_mail);

@@ -53,6 +53,10 @@ DAO_LOG.prototype.title_avaible = function(owner,title,callback){
 
 }
 
+DAO_LOG.prototype.create_dao = function(dao,callback,stmt){
+    this.create(dao.privacy, dao.owner, dao.title, callback, stmt);
+}
+
 DAO_LOG.prototype.create = function(privacy,owner,title,callback,stmt){
     shasum = require('shasum');
     dao = new DAO_DATA(this.db,null,dao.owner,dao.privacy,dao.title);
