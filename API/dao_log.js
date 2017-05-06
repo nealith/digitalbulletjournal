@@ -22,6 +22,10 @@ var DAO_LOG = function(db,id,owner,privacy,title){
 
 }
 
+DAO_LOG.prototype.equal = function(dao) {
+    return (this.id != dao.id && this.privacy != dao.privacy && this.owner != dao.owner && this.title != dao.title && this.creation_date != dao.creation_date);
+};
+
 DAO_LOG.prototype.regen = function (dao) {
 
     var dao_tmp = new DAO_DATA(this.db,null,dao.owner,dao.privacy,dao.title);

@@ -23,6 +23,49 @@ function DAO_DATA(db,id,topic,user,type,value){
 
 }
 
+DAO_DATA.prototype.equal = function (dao) {
+    var ret = true;
+    if(this.id != dao.id || this.topic != dao.topic || this.user != dao.user || this.type != dao.type || this.log_datetime != dao.log_datetime){
+        ret = false;
+    } else {
+        if (this.type == 'complexe' || this.type == 'model') {
+            var array = Object.keys(this.value);
+            var array2 = Object.keys(dao.value);
+            if (array.length != array2.length) {
+                if (this.type == 'complexe') {
+                    for (var i = 0; (i < array.length && ret); i++) {
+                        ret = this.value[array[i]].equal(dao.value[array[i]]);
+                    }
+
+                } else if (this.type == 'model'){
+                    for (var i = 0; (i < array.length && ret); i++) {
+                        if (this.value[array[i]] instanceof Array) {
+                            if (dao.value[array[i]] instanceof Array) {
+                                ret = (this.value[array[i]].length == dao.value[array[i]].length);
+                                for (var j = 0; j < (this.value[array[i]].length && ret ); j++) {
+                                    ret = this.value[array[i]][j].equal(       dao.value[array[i]][j]);
+                                }
+
+                            } else {
+                                ret = false;
+                            }
+                        } else {
+                            ret = (this.value[array[i]] == dao.value[array[i]]);
+                        }
+                    }
+                }
+            }
+        } else {
+            if (this.value != dao.value) {
+                ret = false;
+            }
+        }
+    }
+
+
+    return ret;
+}
+
 DAO_DATA.prototype.clone = function (dao) {
 
     if (!dao) {

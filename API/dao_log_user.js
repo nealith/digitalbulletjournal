@@ -23,6 +23,10 @@ var DAO_LOG_USER = function(db,user,log,writting_rights,admin_rights){
 
 }
 
+DAO_LOG_USER.prototype.equal = function(dao) {
+    return (this.user = dao.user && this.writting_rights = dao.writting_rights && this.log = dao.log && this.admin_rights = dao.admin_rights && this.adding_date = dao.adding_date);
+};
+
 DAO_LOG_USER.prototype.regen = function (dao) {
 
     var dao_tmp = new DAO_DATA(this.db,null,dao.log,dao.writting_rights,dao.admin_rights);

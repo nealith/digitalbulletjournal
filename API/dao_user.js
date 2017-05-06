@@ -25,6 +25,10 @@ var DAO_USER = function(db,id,password,first_name,last_name,nick_name,e_mail){
 
 }
 
+DAO_USER.prototype.equal = function(dao) {
+    return (this.id == dao.id && this.first_name == dao.first_name && this.password == dao.password && this.nick_name == dao.nick_name && this.last_name == dao.last_name && this.e_mail == dao.e_mail && this.creation_date == dao.creation_date);
+};
+
 DAO_USER.prototype.regen = function (dao) {
 
     var dao_tmp = new DAO_DATA(this.db,null,dao.password,dao.first_name,dao.last_name,dao.nick_name,dao.e_mail);

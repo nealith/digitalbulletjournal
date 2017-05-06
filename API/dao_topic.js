@@ -20,6 +20,10 @@ var DAO_TOPIC = function(db,id,log,title){
 
 }
 
+DAO_TOPIC.prototype.equal = function(dao) {
+    return (this.id == dao.id &&  this.log == dao.log &&  this.title == dao.title &&  this.creation_date == dao.creation_date);
+};
+
 DAO_TOPIC.prototype.regen = function (dao) {
 
     var dao_tmp = new DAO_DATA(this.db,null,dao.log,dao.title);
@@ -50,6 +54,8 @@ DAO_TOPIC.prototype.title_avaible = function(log,title,callback){
     })
 
 }
+
+
 
 DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
     this.create(dao.log, dao.title, callback, stmt);
