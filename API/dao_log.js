@@ -62,12 +62,7 @@ DAO_LOG.prototype.title_avaible = function(owner,title,callback){
 }
 
 DAO_LOG.prototype.create_dao = function(dao,callback,stmt){
-    this.create(dao.privacy, dao.owner, dao.title, callback, stmt);
-}
-
-DAO_LOG.prototype.create = function(privacy,owner,title,callback,stmt){
     shasum = require('shasum');
-    dao = new DAO_DATA(this.db,null,dao.owner,dao.privacy,dao.title);
     dao.creation_date = Date.now();
     dao.id = shasum(dao.owner,dao.title,dao.creation_date);
     if (!stmt) {
@@ -87,14 +82,18 @@ DAO_LOG.prototype.create = function(privacy,owner,title,callback,stmt){
                 }
             });
             if (finalize) {
-                stmt.exec(callback);
+                stmt.exec(callback,dao);
             }
         } else {
             callback(err,args)
         }
     })
+}
 
+DAO_LOG.prototype.create = function(privacy,owner,title,callback,stmt){
 
+    dao = new DAO_DATA(this.db,null,dao.owner,dao.privacy,dao.title);
+    this.create_dao(dao,callback,stmt);
 
 }
 

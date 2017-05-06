@@ -61,12 +61,7 @@ DAO_TOPIC.prototype.title_avaible = function(log,title,callback){
 
 
 DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
-    this.create(dao.log, dao.title, callback, stmt);
-}
-
-DAO_TOPIC.prototype.create = function(log,title,callback,stmt){
     shasum = require('shasum');
-    dao = new DAO_DATA(this.db,null,dao.log,dao.title);
     dao.creation_date = Date.now();
     dao.id = shasum(dao.log,dao.title,dao.creation_date);
     if (!stmt) {
@@ -78,21 +73,25 @@ DAO_TOPIC.prototype.create = function(log,title,callback,stmt){
             stmt.insert({
                 table:'Topics',
                 keys:null,
-                values:{
+            values:{
                     creation_date:dao.creation_date,
                     title:dao.title,
                     log:dao.log
                 }
             });
             if (finalize) {
-                stmt.exec(callback);
+                stmt.exec(callback,dao);
             }
         } else {
             callback(err,args)
         }
     })
+}
 
+DAO_TOPIC.prototype.create = function(log,title,callback,stmt){
 
+    dao = new DAO_DATA(this.db,null,dao.log,dao.title);
+    this.create_dao(dao,callback,stmt);
 
 }
 

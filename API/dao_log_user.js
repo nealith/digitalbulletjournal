@@ -39,8 +39,7 @@ DAO_LOG_USER.prototype.regen = function (dao) {
     return dao_tmp;
 }
 
-DAO_LOG_USER.prototype.create = function(writting_rights,user,log,admin_rights,callback,stmt){
-    dao = new DAO_DATA(this.db,null,dao.log,dao.writting_rights,dao.admin_rights);
+DAO_LOG_USER.prototype.create_dao = function(dao,callback,stmt){
     dao.adding_date = Date.now();
     dao.log=log;
     dao.user=user;
@@ -60,12 +59,13 @@ DAO_LOG_USER.prototype.create = function(writting_rights,user,log,admin_rights,c
         }
     });
     if (finalize) {
-        stmt.exec(callback);
+        stmt.exec(callback,dao);
     }
+}
 
-
-
-
+DAO_LOG_USER.prototype.create = function(writting_rights,user,log,admin_rights,callback,stmt){
+    dao = new DAO_DATA(this.db,null,dao.log,dao.writting_rights,dao.admin_rights);
+    this.create_dao(dao,callback,stmt);
 }
 
 DAO_LOG_USER.prototype.update = function(callback,stmt,finalize){

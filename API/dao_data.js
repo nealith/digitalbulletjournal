@@ -124,15 +124,8 @@ DAO_DATA.prototype.regen = function (dao) {
 }
 
 DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
-
-    this.create(dao.topic,dao.user,dao.type,dao.value,callback,stmt);
-
-}
-
-DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt) {
     var finalize = false;
     shasum = require('shasum');
-    dao = new DAO_DATA(this.db,null,topic,user,type,value);
     dao.log_datetime = Date.now();
     dao.id = shasum(topic+user+dao.log_datetime)
     if (!stmt) {
@@ -169,8 +162,16 @@ DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt) {
         });
     }
     if (finalize) {
-        stmt.exec(callback);
+        stmt.exec(callback,dao);
     }
+
+
+}
+
+DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt) {
+
+    dao = new DAO_DATA(this.db,null,topic,user,type,value);
+    this.create_dao(dao,callback,stmt);
 
 
 }
