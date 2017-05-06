@@ -1,4 +1,4 @@
-var DAO_LOG = function(db,id,owner,privacy,title){
+var DAO_LOG = function(db,id,callback,owner,privacy,title){
 
 
     this.db = db;
@@ -11,7 +11,11 @@ var DAO_LOG = function(db,id,owner,privacy,title){
                 self.owner = args.owner;
                 self.title = args.title;
                 self.creation_date = args.creation_date;
+                callback(err,seft);
+            } else {
+                callback(err,null);
             }
+
         });
     } else {
         this.id = null;

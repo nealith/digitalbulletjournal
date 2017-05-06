@@ -1,4 +1,4 @@
-var DAO_LOG_USER = function(db,user,log,writting_rights,admin_rights){
+var DAO_LOG_USER = function(db,user,log,callback,writting_rights,admin_rights){
 
     this.db = db;
     if(user && log){
@@ -11,6 +11,9 @@ var DAO_LOG_USER = function(db,user,log,writting_rights,admin_rights){
                 self.admin_rights = args.admin_rights;
                 self.adding_date = args.adding_date;
                 self.is_create = true;
+                callback(err,seft);
+            } else {
+                callback(err,null);
             }
         });
     } else {

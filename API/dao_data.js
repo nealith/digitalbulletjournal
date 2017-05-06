@@ -1,4 +1,4 @@
-function DAO_DATA(db,id,topic,user,type,value){
+function DAO_DATA(db,id,callback,topic,user,type,value){
 
     this.db = db;
     if (id) {
@@ -11,6 +11,9 @@ function DAO_DATA(db,id,topic,user,type,value){
                 self.type = args.type;
                 self.value = args.value;
                 self.log_datetime = args.log_datetime;
+                callback(err,seft);
+            } else {
+                callback(err,null);
             }
         });
     } else {

@@ -1,4 +1,4 @@
-var DAO_TOPIC = function(db,id,log,title){
+var DAO_TOPIC = function(db,id,callback,log,title){
 
 
     this.db = db;
@@ -10,6 +10,9 @@ var DAO_TOPIC = function(db,id,log,title){
                 self.log = args.log;
                 self.title = args.title;
                 self.creation_date = args.creation_date;
+                callback(err,seft);
+            } else {
+                callback(err,null);
             }
         });
     } else {

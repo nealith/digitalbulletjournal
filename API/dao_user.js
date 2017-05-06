@@ -1,4 +1,4 @@
-var DAO_USER = function(db,id,password,first_name,last_name,nick_name,e_mail){
+var DAO_USER = function(db,id,callback,password,first_name,last_name,nick_name,e_mail){
 
     this.db = db;
     if(id){
@@ -12,6 +12,9 @@ var DAO_USER = function(db,id,password,first_name,last_name,nick_name,e_mail){
                 self.last_name = args.last_name;
                 self.e_mail = args.e_mail;
                 self.creation_date = args.creation_date;
+                callback(err,seft);
+            } else {
+                callback(err,null);
             }
         });
     } else {
