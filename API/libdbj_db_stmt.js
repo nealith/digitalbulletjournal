@@ -43,7 +43,7 @@ DB_TRANSACTION_STATEMENT.prototype.select = function (args) {
     }
 }
 
-DB_TRANSACTION_STATEMENT.prototype.exec = function (callback) {
+DB_TRANSACTION_STATEMENT.prototype.exec = function (callback,callback_args) {
     if (!this.lock) {
         this.lock = true;
         this.callback = callback;
@@ -52,15 +52,29 @@ DB_TRANSACTION_STATEMENT.prototype.exec = function (callback) {
             this.db.exec(this.sql,function(err,args){
                 if (self.lock) {
                     if (!err) {
-                        self.db.run('COMMIT;');
+                        self.db.run('COMMIT;',function(err,args){
+                            if (!err) {
+                                if (callback_args) {
+                                    args = callback_args;
+                                }
+                            }
+                            callback(err,args);
+                        });
                     } else {
-                        self.db.run('ROLLBACK;');
+                        self.db.run('ROLLBACK;',callback);
                     }
-                    self.callback(err,args);
+
                 }
             });
         } else {
-            this.db.exec(this.sql,this.callback);
+            this.db.exec(this.sql,function(err,args){
+                if (!err) {
+                    if (callback_args) {
+                        args = callback_args;
+                    }
+                }
+                callback(err,args);
+            });
         }
     }
 }
