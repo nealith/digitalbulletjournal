@@ -101,7 +101,7 @@ DAO_DATA.prototype.clone = function (dao) {
 
 DAO_DATA.prototype.regen = function (dao) {
 
-    var dao_tmp = new DAO_DATA(this.db,null,dao.topic,dao.user,dao.type,dao.value);
+    var dao_tmp = new DAO_DATA(this.db,null,null,dao.topic,dao.user,dao.type,dao.value);
     dao_tmp.log_datetime = dao.log_datetime;
     dao_tmp.id = dao.id;
     if (dao_tmp.type == 'complexe') {
@@ -170,7 +170,7 @@ DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
 
 DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt) {
 
-    dao = new DAO_DATA(this.db,null,topic,user,type,value);
+    var dao = new DAO_DATA(this.db,null,null,topic,user,type,value);
     this.create_dao(dao,callback,stmt);
 
 
@@ -280,7 +280,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                 var label = labels[m];
                 var ids = new Array();
 
-                for lab in dao.value {
+                for (lab in dao.value) {
                     if (dao.value[lab] instanceof Array()) {
                         labels.push(lab);
                         for (var i = 0; i < dao.value[lab].length; i++) {
@@ -316,7 +316,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                     }
                 }
 
-                var recursif_callback_update(err,args){
+                var recursif_callback_update = function(err,args){
                     if (!err) {
                         label = labels[m];
 
@@ -562,10 +562,10 @@ DAO_DATA.prototype.get = function (id,callback) {
                         rows = new Array();
                         for (var i = 0; i < args.length; i++) {
 
-                            if args[i].data ==('Text'  || args[i].data == 'Date'  || args[i].data == 'Boolean'  || args[i].data == 'Number'  || args[i].data == 'Complexe'  || args[i].data == 'Model') {
+                            if (args[i].data =='Text'  || args[i].data == 'Date'  || args[i].data == 'Boolean'  || args[i].data == 'Number'  || args[i].data == 'Complexe'  || args[i].data == 'Model') {
                                 dao.values[args[i].label]=args[i].data
                             } else {
-                                rows.push(args[]);
+                                rows.push(args[i]);
                             }
                         }
                         dao.get(rows[m].data,recursive_callback);

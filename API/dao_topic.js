@@ -29,7 +29,7 @@ DAO_TOPIC.prototype.equal = function(dao) {
 
 DAO_TOPIC.prototype.regen = function (dao) {
 
-    var dao_tmp = new DAO_DATA(this.db,null,dao.log,dao.title);
+    var dao_tmp = new DAO_TOPIC(this.db,null,null,dao.log,dao.title);
     dao_tmp.creation_date = dao.creation_date;
     dao_tmp.id = dao.id;
 
@@ -63,7 +63,7 @@ DAO_TOPIC.prototype.title_avaible = function(log,title,callback){
 DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
     shasum = require('shasum');
     dao.creation_date = Date.now();
-    dao.id = shasum(dao.log,dao.title,dao.creation_date);
+    dao.id = shasum(dao.log+dao.title+dao.creation_date);
     if (!stmt) {
         stmt = this.db.stmt(true);
         finalize = true;
@@ -90,7 +90,7 @@ DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
 
 DAO_TOPIC.prototype.create = function(log,title,callback,stmt){
 
-    dao = new DAO_DATA(this.db,null,dao.log,dao.title);
+    var dao = new DAO_TOPIC(this.db,null,null,log,title);
     this.create_dao(dao,callback,stmt);
 
 }
