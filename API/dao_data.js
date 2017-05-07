@@ -31,16 +31,16 @@ DAO_DATA.prototype.equal = function (dao) {
     if(this.id != dao.id || this.topic != dao.topic || this.user != dao.user || this.type != dao.type || this.log_datetime != dao.log_datetime){
         ret = false;
     } else {
-        if (this.type == 'complexe' || this.type == 'model') {
+        if (this.type == 'Compound' || this.type == 'Model') {
             var array = Object.keys(this.value);
             var array2 = Object.keys(dao.value);
             if (array.length != array2.length) {
-                if (this.type == 'complexe') {
+                if (this.type == 'Compound') {
                     for (var i = 0; (i < array.length && ret); i++) {
                         ret = this.value[array[i]].equal(dao.value[array[i]]);
                     }
 
-                } else if (this.type == 'model'){
+                } else if (this.type == 'Model'){
                     for (var i = 0; (i < array.length && ret); i++) {
                         if (this.value[array[i]] instanceof Array) {
                             if (dao.value[array[i]] instanceof Array) {
@@ -77,7 +77,7 @@ DAO_DATA.prototype.clone = function (dao) {
 
     var new_dao = new DAO_DATA(this.db,null,dao.topic,dao.user,dao.type,dao.value);
 
-    if (dao.type=='Complexe' || dao.type=='Model') {
+    if (dao.type=='Compound' || dao.type=='Model') {
         new_dao.value = new Object;
         for (label in dao.value) {
             if (dao.type=='Model') {
@@ -104,7 +104,7 @@ DAO_DATA.prototype.regen = function (dao) {
     var dao_tmp = new DAO_DATA(this.db,null,null,dao.topic,dao.user,dao.type,dao.value);
     dao_tmp.log_datetime = dao.log_datetime;
     dao_tmp.id = dao.id;
-    if (dao_tmp.type == 'complexe') {
+    if (dao_tmp.type == 'Compound') {
         for (label in dao_tmp.value) {
             dao_tmp.value[label]=this.regen(null,dao_tmp.value[label]);
         }
@@ -143,7 +143,7 @@ DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
             type:dao.type
         }
     });
-    if (dao.type=='Complexe' || dao.type=='Model') {
+    if (dao.type=='Compound' || dao.type=='Model') {
         stmt.insert({
             table:'Data'+dao.type+'s',
             keys:null,
@@ -213,10 +213,10 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
             }
         });
     }
-    if (this.type == 'Complexe') {
+    if (this.type == 'Compound') {
 
 
-        // 2 - Else : create the object in databse (see update()) and (here) insert it in Complexes_Data as new connection
+        // 2 - Else : create the object in databse (see update()) and (here) insert it in Compounds_Data as new connection
         // 3 - Finish by calling sub-object update()
         // At the end, finalize statement if finalize param is true
 
@@ -228,10 +228,10 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
             }
             // 2 - For all sub-object, call update
             this.value[label].update(null,stmt,false);
-            // 3 - If object already in database, update relations in Complexes_Data (update the id of sub-object (know as 'data'))
+            // 3 - If object already in database, update relations in Compounds_Data (update the id of sub-object (know as 'data'))
             if (update) {
                 stmt.update({
-                    table:'Complexes_Data',
+                    table:'Compounds_Data',
                     keys:{
                         parent:this.id,
                         label:label
@@ -241,9 +241,9 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                     }
                 });
             } else {
-                // 3 bis - If object were not present in database, all relation in Complexes_Data don't exist yet, so we add them
+                // 3 bis - If object were not present in database, all relation in Compounds_Data don't exist yet, so we add them
                 stmt.insert({
-                    table:'Complexes_Data',
+                    table:'Compounds_Data',
                     keys:null,
                     values:{
                         parent:this.id,
@@ -427,10 +427,10 @@ DAO_DATA.prototype.delete = function (callback,stmt,finalize) {
         stmt = this.db.stmt(true);
         finalize = true;
     }
-    if (this.type == 'Complexe') {
+    if (this.type == 'Compound') {
         for (label in this.value) {
             stmt.delete({
-                table:'Complexes_Data',
+                table:'Compounds_Data',
                 keys:{
                     parent:this.id,
                     data:this.value[label].id
@@ -503,7 +503,7 @@ DAO_DATA.prototype.get = function (id,callback) {
         if (!err) {
             dao = new DAO_DATA(db,null,args[0].topic,args[0].user,args[0].type,new Object());
             dao.id = args[0].id
-            if (dao.type == 'Complexe') {
+            if (dao.type == 'Compound') {
                 var rows;
                 var m = 0 // indice in rows (args);
                 var recursive_callback = function(err,args){
@@ -519,7 +519,7 @@ DAO_DATA.prototype.get = function (id,callback) {
                     }
                 }
                 dao.db.select({
-                    table:'Complexes_Data',
+                    table:'Compounds_Data',
                     keys:{
                         parent:dao.id
                     },
@@ -562,7 +562,7 @@ DAO_DATA.prototype.get = function (id,callback) {
                         rows = new Array();
                         for (var i = 0; i < args.length; i++) {
 
-                            if (args[i].data =='Text'  || args[i].data == 'Date'  || args[i].data == 'Boolean'  || args[i].data == 'Number'  || args[i].data == 'Complexe'  || args[i].data == 'Model') {
+                            if (args[i].data =='Text'  || args[i].data == 'Date'  || args[i].data == 'Boolean'  || args[i].data == 'Number'  || args[i].data == 'Compound'  || args[i].data == 'Model') {
                                 dao.values[args[i].label]=args[i].data
                             } else {
                                 rows.push(args[i]);
