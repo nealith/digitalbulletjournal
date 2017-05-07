@@ -10,6 +10,13 @@ function DAO_DATA(db,id,callback,topic,user,type,value,model){
                 self.user = args.user;
                 self.type = args.type;
                 self.value = args.value;
+                if (self.type == 'Boolean') {
+                    if (self.value == 0) {
+                        self.value = true;
+                    } else {
+                        self.value = false;
+                    }
+                }
                 self.log_datetime = args.log_datetime;
                 if (self.type == 'Compound') {
                     self.model = args.model;
@@ -136,7 +143,7 @@ DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
     var finalize = false;
     shasum = require('shasum');
     dao.log_datetime = Date.now();
-    dao.id = shasum(topic+user+dao.log_datetime)
+    dao.id = shasum(dao.topic+dao.user+dao.log_datetime)
     if (!stmt) {
         stmt = this.db.stmt(true);
         finalize = true;
@@ -152,7 +159,16 @@ DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
             type:dao.type
         }
     });
-    if (dao.type=='Compound' || dao.type=='Model') {
+    if (dao.type=='Compound') {
+        stmt.insert({
+            table:'Data'+dao.type+'s',
+            keys:null,
+            values:{
+                id:dao.id,
+                model:dao.model
+            }
+        });
+    } else if (dao.type=='Model') {
         stmt.insert({
             table:'Data'+dao.type+'s',
             keys:null,
@@ -642,7 +658,7 @@ DAO_DATA.prototype.get_all = function (topic,type,callback) {
             this.db.select({
                 table:'Data'+type+'s',
                 keys:{
-                    topic:topic
+                    topic:topic,
                     type:type
                 },
                 values:null

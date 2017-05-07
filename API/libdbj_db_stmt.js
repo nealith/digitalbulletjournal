@@ -45,16 +45,18 @@ DB_TRANSACTION_STATEMENT.prototype.select = function (args) {
 
 DB_TRANSACTION_STATEMENT.prototype.exec = function (callback,callback_args) {
     if (!this.lock) {
+
         this.lock = true;
         this.callback = callback;
         if (this.transaction) {
             var self = this;
-            this.db.exec(this.sql,function(err,args){
+            this.db.exec(self.sql,function(err,args){
                 if (self.lock) {
                     if (!err) {
                         self.db.run('COMMIT;',function(err,args){
                             if (!err) {
                                 if (callback_args) {
+
                                     args = callback_args;
                                 }
                             }

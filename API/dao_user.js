@@ -1,4 +1,4 @@
-var DAO_USER = function(db,id,callback,password,first_name,last_name,nick_name,e_mail){
+var DAO_USER = function(db,id,callback,first_name,last_name,password,nick_name,e_mail){
 
     this.db = db;
     if(id){
@@ -34,7 +34,7 @@ DAO_USER.prototype.equal = function(dao) {
 
 DAO_USER.prototype.regen = function (dao) {
 
-    var dao_tmp = new DAO_USER(this.db,null,null,dao.password,dao.first_name,dao.last_name,dao.nick_name,dao.e_mail);
+    var dao_tmp = new DAO_USER(this.db,null,null,dao.first_name,dao.last_name,dao.password,dao.nick_name,dao.e_mail);
     dao_tmp.creation_date = dao.creation_date;
     dao_tmp.id = dao.id;
 
@@ -66,9 +66,9 @@ DAO_USER.prototype.create_dao = function(dao,callback,stmt){
     }
 }
 
-DAO_USER.prototype.create = function(first_name,password,nick_name,last_name,e_mail,callback,stmt){
+DAO_USER.prototype.create = function(first_name,last_name,password,nick_name,e_mail,callback,stmt){
 
-    var dao = new DAO_USER(this.db,null,null,password,first_name,last_name,nick_name,e_mail);
+    var dao = new DAO_USER(this.db,null,null,first_name,last_name,password,nick_name,e_mail);
     this.create_dao(dao,callback,stmt);
 
 }
@@ -195,7 +195,7 @@ DAO_USER.prototype.get = function(id,callback){
         values:null
     },function(err,args){
         if(!err){
-            dao = new DAO_USER(db,null,args[0].password,args[0].first_name,args[0].last_name,args[0].nick_name,args[0].e_mail);
+            dao = new DAO_USER(db,null,args[0].first_name,args[0].last_name,args[0].password,args[0].nick_name,args[0].e_mail);
             dao.id = args[0].id;
             callback(err,dao);
         }else{

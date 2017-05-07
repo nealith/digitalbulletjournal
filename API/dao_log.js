@@ -90,7 +90,7 @@ DAO_LOG.prototype.create_dao = function(dao,callback,stmt){
     })
 }
 
-DAO_LOG.prototype.create = function(privacy,owner,title,callback,stmt){
+DAO_LOG.prototype.create = function(owner,privacy,title,callback,stmt){
 
     var dao = new DAO_LOG(this.db,null,null,owner,privacy,title);
     this.create_dao(dao,callback,stmt);
@@ -245,7 +245,7 @@ DAO_LOG.prototype.get_all = function(user,callback){
         this.db.select({
             table:'Logs',
             keys:{
-                owner:id
+                owner:user
             },
             values:null
         },callback);
