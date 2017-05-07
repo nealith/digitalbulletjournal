@@ -225,28 +225,33 @@ DAO_LOG_USER.prototype.get = function(user,log,callback){
 
 }
 
-DAO_LOG_USER.prototype.get_all_user = function(id,callback){
+DAO_LOG_USER.prototype.get_all = function(user,log,callback){
 
-    this.db.select({
-        table:'Logs_Users',
-        keys:{
-            user:id
-        },
-        values:null
-    },callback);
-
-}
-
-DAO_LOG_USER.prototype.get_all_log = function(id,callback){
-
-    this.db.select({
-        table:'Logs_Users',
-        keys:{
-            log:id
-        },
-        values:null
-    },callback);
-
+    if (user && log) {
+        this.get(user,log,callback);
+    } else if (user) {
+        this.db.select({
+            table:'Logs_Users',
+            keys:{
+                user:user
+            },
+            values:null
+        },callback);
+    } else if (log) {
+        this.db.select({
+            table:'Logs_Users',
+            keys:{
+                log:log
+            },
+            values:null
+        },callback);
+    } else {
+        this.db.select_all({
+            table:'Logs_Users',
+            keys:null,
+            values:null
+        },callback);
+    }
 }
 
 module.exports = DAO_LOG_USER;

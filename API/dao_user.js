@@ -132,7 +132,7 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
         if (!err) {
             m++;
             if (m == dao_logs.length) {
-                dao_log_user.get_all_user(self.id,function(err,args){
+                dao_log_user.get_all(self.id,null,function(err,args){
                     if (!err) {
                         dao_logs_users = args
                         dao_logs_users[n].delete(recursive_callback_delete_user_relations,stmt,false);
@@ -170,7 +170,7 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
         }
     }
 
-    dao_log.get_all_user(self.id,function(err,args){
+    dao_log.get_all(self.id,function(err,args){
         if (!err) {
             dao_logs = args
             dao_logs[m].delete(recursive_callback_delete_logs,stmt,false);
@@ -203,6 +203,14 @@ DAO_USER.prototype.get = function(id,callback){
         }
     });
 
+}
+
+DAO_USER.prototype.get_all = function(callback){
+    this.db.select_all({
+        table:'Users',
+        keys:null,
+        values:null
+    },callback);
 }
 
 module.exports = DAO_USER;

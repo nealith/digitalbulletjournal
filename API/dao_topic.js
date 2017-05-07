@@ -38,7 +38,7 @@ DAO_TOPIC.prototype.regen = function (dao) {
 
 DAO_TOPIC.prototype.title_avaible = function(log,title,callback){
 
-    this.get_all_log(log,function(err,args){
+    this.get_all(log,function(err,args){
         if (!err) {
             var find = false;
             for (var i = 0; (i < args.length && !find); i++) {
@@ -173,7 +173,7 @@ DAO_TOPIC.prototype.delete = function(callback,stmt,finalize){
         }
     }
 
-    dao_data.get_all_topic(self.id,null,function(err,args){
+    dao_data.get_all(self.id,null,function(err,args){
         if (!err) {
             all_data = args;
             // Launch call on recursive_callback_delete_data
@@ -216,15 +216,25 @@ DAO_TOPIC.prototype.get = function(id,callback){
 
 }
 
-DAO_TOPIC.prototype.get_all_log = function(id,callback){
+DAO_TOPIC.prototype.get_all = function(log,callback){
 
-    this.db.select({
-        table:'Topics',
-        keys:{
-            log:id
-        },
-        values:null
-    },callback);
+    if (log) {
+        this.db.select({
+            table:'Topics',
+            keys:{
+                log:log
+            },
+            values:null
+        },callback);
+    } else {
+        this.db.select_all({
+            table:'Topics',
+            keys:null,
+            values:null
+        },callback);
+    }
+
+
 
 }
 

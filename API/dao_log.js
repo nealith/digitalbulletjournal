@@ -41,7 +41,7 @@ DAO_LOG.prototype.regen = function (dao) {
 
 DAO_LOG.prototype.title_avaible = function(owner,title,callback){
 
-    this.get_all_user(owner,function(err,args){
+    this.get_all(owner,function(err,args){
         if (!err) {
             var find = false;
             for (var i = 0; (i < args.length && !find); i++) {
@@ -164,7 +164,7 @@ DAO_LOG.prototype.delete = function(callback,stmt,finalize){
         if (!err) {
             m++;
             if (m == dao_topics.length) {
-                dao_log_user.get_all_user(self.id,function(err,args){
+                dao_log_user.get_all(self.id,null,function(err,args){
                     if (!err) {
                         dao_logs_users = args
                         dao_logs_users[n].delete(recursive_callback_delete_log_relations,stmt,false);
@@ -202,7 +202,7 @@ DAO_LOG.prototype.delete = function(callback,stmt,finalize){
         }
     }
 
-    dao_topic.get_all_log(self.id,function(err,args){
+    dao_topic.get_all(self.id,function(err,args){
         if (!err) {
             dao_topics = args
             dao_topics[m].delete(recursive_callback_delete_topics,stmt,false);
@@ -238,15 +238,24 @@ DAO_LOG.prototype.get = function(id,callback){
 
 }
 
-DAO_LOG.prototype.get_all_user = function(id,callback){
+DAO_LOG.prototype.get_all = function(user,callback){
 
-    this.db.select({
-        table:'Logs',
-        keys:{
-            owner:id
-        },
-        values:null
-    },callback);
+
+    if (user) {
+        this.db.select({
+            table:'Logs',
+            keys:{
+                owner:id
+            },
+            values:null
+        },callback);
+    } else {
+        this.db.select_all({
+            table:'Logs',
+            keys:null,
+            values:null
+        },callback);
+    }
 
 }
 

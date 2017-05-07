@@ -1,4 +1,4 @@
-function DAO_DATA(db,id,callback,topic,user,type,value){
+function DAO_DATA(db,id,callback,topic,user,type,value,model){
 
     this.db = db;
     if (id) {
@@ -11,6 +11,9 @@ function DAO_DATA(db,id,callback,topic,user,type,value){
                 self.type = args.type;
                 self.value = args.value;
                 self.log_datetime = args.log_datetime;
+                if (self.type == 'Compound') {
+                    self.model = args.model;
+                }
                 callback(err,seft);
             } else {
                 callback(err,null);
@@ -22,6 +25,9 @@ function DAO_DATA(db,id,callback,topic,user,type,value){
         this.user = user;
         this.type = type;
         this.value = value;
+        if (this.type == 'Compound') {
+            this.model = model;
+        }
     }
 
 }
@@ -32,9 +38,12 @@ DAO_DATA.prototype.equal = function (dao) {
         ret = false;
     } else {
         if (this.type == 'Compound' || this.type == 'Model') {
+            if (this.type == 'Compound') {
+                ret = this.model == dao.model;
+            }
             var array = Object.keys(this.value);
             var array2 = Object.keys(dao.value);
-            if (array.length != array2.length) {
+            if (array.length != array2.length && ret) {
                 if (this.type == 'Compound') {
                     for (var i = 0; (i < array.length && ret); i++) {
                         ret = this.value[array[i]].equal(dao.value[array[i]]);
@@ -75,7 +84,7 @@ DAO_DATA.prototype.clone = function (dao) {
         dao = this;
     }
 
-    var new_dao = new DAO_DATA(this.db,null,dao.topic,dao.user,dao.type,dao.value);
+    var new_dao = new DAO_DATA(this.db,null,dao.topic,dao.user,dao.type,dao.value,dao.model);
 
     if (dao.type=='Compound' || dao.type=='Model') {
         new_dao.value = new Object;
@@ -101,7 +110,7 @@ DAO_DATA.prototype.clone = function (dao) {
 
 DAO_DATA.prototype.regen = function (dao) {
 
-    var dao_tmp = new DAO_DATA(this.db,null,null,dao.topic,dao.user,dao.type,dao.value);
+    var dao_tmp = new DAO_DATA(this.db,null,null,dao.topic,dao.user,dao.type,dao.value,dao.model);
     dao_tmp.log_datetime = dao.log_datetime;
     dao_tmp.id = dao.id;
     if (dao_tmp.type == 'Compound') {
@@ -171,6 +180,9 @@ DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
 DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt) {
 
     var dao = new DAO_DATA(this.db,null,null,topic,user,type,value);
+    if (dao.type == 'Compound') {
+        dao.model = value;
+    }
     this.create_dao(dao,callback,stmt);
 
 
@@ -214,7 +226,17 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
         });
     }
     if (this.type == 'Compound') {
-
+        if (update) {
+            stmt.update({
+                table:'DataCompounds',
+                keys:{
+                    id:this.id
+                },
+                values:{
+                    model:this.model
+                }
+            });
+        }
 
         // 2 - Else : create the object in databse (see update()) and (here) insert it in Compounds_Data as new connection
         // 3 - Finish by calling sub-object update()
@@ -503,35 +525,51 @@ DAO_DATA.prototype.get = function (id,callback) {
         if (!err) {
             dao = new DAO_DATA(db,null,args[0].topic,args[0].user,args[0].type,new Object());
             dao.id = args[0].id
+
             if (dao.type == 'Compound') {
-                var rows;
-                var m = 0 // indice in rows (args);
-                var recursive_callback = function(err,args){
-                    if (!err) {
-                        dao.values[rows[m].label] = args;
-                        m++
-                        if (m = rows.length) {
-                            callback(null,dao);
-                        }
-                        dao.get(rows[m].data,recursive_callback);
-                    } else {
-                        callback(err,args);
-                    }
-                }
                 dao.db.select({
-                    table:'Compounds_Data',
+                    table:'Data'+dao.type+'s',
                     keys:{
-                        parent:dao.id
+                        id:dao.id
                     },
                     values:null
                 },function(err,args){
-                    if (!err) {
-                        rows = args;
-                        dao.get(rows[m].data,recursive_callback);
+                    if (args) {
+                        dao.model = args[0].model
+                        var rows;
+                        var m = 0 // indice in rows (args);
+                        var recursive_callback = function(err,args){
+                            if (!err) {
+                                dao.values[rows[m].label] = args;
+                                m++
+                                if (m = rows.length) {
+                                    callback(null,dao);
+                                }
+                                dao.get(rows[m].data,recursive_callback);
+                            } else {
+                                callback(err,args);
+                            }
+                        }
+                        dao.db.select({
+                            table:'Compounds_Data',
+                            keys:{
+                                parent:dao.id
+                            },
+                            values:null
+                        },function(err,args){
+                            if (!err) {
+                                rows = args;
+                                dao.get(rows[m].data,recursive_callback);
+                            } else {
+                                callback(err,args)
+                            }
+                        });
+
                     } else {
-                        callback(err,args)
+                        callback(err,null)
                     }
                 });
+
 
             } else if (dao.type == 'Model'){
                 var rows;
@@ -584,8 +622,6 @@ DAO_DATA.prototype.get = function (id,callback) {
                 },function(err,args){
                     if (args) {
                         dao.value = args[0].value
-                        dao.lock = false;
-                        console.log(dao);
                         callback(null,dao);
                     } else {
                         callback(err,null)
@@ -600,29 +636,14 @@ DAO_DATA.prototype.get = function (id,callback) {
     });
 }
 
-DAO_DATA.prototype.get_all = function (type,callback) {
-    if (type) {
-        this.db.select_all({
-            table:'Data',
-            keys:null,
-            values:null
-        },callback);
-    } else {
-        this.db.select_all({
-            table:'Data'+type+'s',
-            keys:null,
-            values:null
-        },callback);
-    }
-}
-
-DAO_DATA.prototype.get_all_topic = function (topic,type,callback) {
+DAO_DATA.prototype.get_all = function (topic,type,callback) {
     if(topic){
         if (type) {
             this.db.select({
                 table:'Data'+type+'s',
                 keys:{
                     topic:topic
+                    type:type
                 },
                 values:null
             },callback);
@@ -632,6 +653,22 @@ DAO_DATA.prototype.get_all_topic = function (topic,type,callback) {
                 keys:{
                     topic:topic
                 },
+                values:null
+            },callback);
+        }
+    } else {
+        if (type) {
+            this.db.select({
+                table:'Data'+type+'s',
+                keys:{
+                    type:type
+                },
+                values:null
+            },callback);
+        } else {
+            this.db.select_all({
+                table:'Data',
+                keys:null,
                 values:null
             },callback);
         }
