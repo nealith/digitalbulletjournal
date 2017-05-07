@@ -1,95 +1,104 @@
 var run_count = 0;
 var fail_count = 0;
 
-function to_run(test,fonction_to_run){
-    succes = fonction_to_run();
-    var suc = 'SUCCES';
-    var fai = 'FAIL';
+var dao_user;
+var dao_log;
+var dao_topic;
+var dao_log_user;
+var dao_data;
 
-    run_count++;
+// FULL DATA BASE
+    // Create users
+    // Create logs
+    // Share logs
+    // Create topics
+    // Create simples data
+    // Create compound data
+    // Create models data
 
-    var result = '';
-    if (succes) {
-        result = suc;
-    } else {
-        result = fai;
-        fail_count++;
-    }
+// USER TESTS
+    // Create a user with create()
+    // Create a user with new() and create_dao()
+    // Create a user with new() and update()
 
-    console.log(test,result);
+    // Delete a user without log and without shared log
+    // Delete a user with log and and without shared log
+    // Delete a user with shared log and without log
+    // Delete a user with shared log and log
+
+    // Update a user
+
+    // Get a user
+
+// LOG TESTS
+    // Create a log with create()
+    // Create a log with new() and create_dao()
+    // Create a log with new() and update()
+    // Create a log with title that is already used
+
+    // Delete a log that is not shared
+    // Delete a log that is shared
+
+    // Update a log
+    // Get a log
+
+// TOPIC TESTS
+    // Create a topic with create()
+    // Create a topic with new() and create_dao()
+    // Create a topic with new() and update()
+    // Create a topic with title that is already used
+
+    // Delete a topic that is not shared
+    // Delete a topic that is shared
+
+    // Update a topic
+    // Get a topic
+
+// LOG_USER TESTS
+    // Share a log
+
+    // Unshare a log
+
+    // Update a log_user
+
+    // Get  à log_user
+
+// DATA TESTS
+    // Create a simple data with create()
+    // Create a simple data with new() and create_dao()
+    // Create a simple data with new() and update()
+
+    // Create a compound data with create()
+    // Create a compound data with new() and create_dao()
+    // Create a compound data with new() and update()
+
+    // Create a model data with create()
+    // Create a model data with new() and create_dao()
+    // Create a model data with new() and update()
+
+    // Delete a simple data
+    // Delete a compound data
+    // Delete a model data
+
+    // Update a simple data
+    // Update a compound data
+    // Update a model data
+
+    // Get a simple data
+    // Get a compound data
+    // Get a model data
 
 
-}
-
-function end_test(message){
-    console.log(message);
-    console.log('Tests run : ',run_count);
-    console.log('Tests succes : ',(run_count-fail_count));
-    console.log('Tests run : ',fail_count);
-    run_count = 0;
-    fail_count = 0;
-
-}
-
-function run_test_on(db){
-
-    var dao_user = new DT_API.DAO_USER(db);
-    var dao_log = new DT_API.DAO_LOG(db);
-    var dao_topic = new DT_API.DAO_TOPIC(db);
-    var dao_log_user = new DT_API.DAO_LOG_USER(db);
-    var dao_data = new DT_API.DAO_DATA(db);
-
-    // USER TESTS
-
-    var users = new Array();
-
-    for (var i = 0; i < 5; i++) {
-        users.push(
-            {
-                first_name: 'user'+i,
-                password: 'user'+i,
-                nick_name: 'user'+i,
-                last_name: 'user'+i,
-                e_mail: 'user'+i
-            }
-        );
-    }
-
-    dao_user.create(users[0].first_name, users[0].password, users[0].nick_name, users[0].last_name, users[0].e_mail,function(err,args){
-        to_run('create user with create()',function(){
-            if (!err) {
-                if (users[0].first_name == args.first_name && users[0].password == args.password && users[0].nick_name == args.nick_name && users[0].last_name == args.last_name && users[0].e_mail == args.e_mail) {
-                    return true;
-                }
-            } else {
-                return false;
-            }
-
-        })
-
-    });
-
-    // LOG TESTS
-
-    // LOG_USER TESTS
-
-    // TOPIC TESTS
-
-    // DATA TESTS
-
-    // DATA COMPLEXE TESTS
-
-    // DATA MODEL TESTS
-
-
-    end_test('TESTS ON SQLITE DB');
-
-}
 
 var DT_API = require('../api.js');
 
-var SQLITE_DB = require('../libdbj_db_sqlite.js');
+dao_user = new DT_API.DAO_USER(db);
+dao_log = new DT_API.DAO_LOG(db);
+dao_topic = new DT_API.DAO_TOPIC(db);
+dao_log_user = new DT_API.DAO_LOG_USER(db);
+dao_data = new DT_API.DAO_DATA(db);
 
+var SQLITE_DB = require('../libdbj_db_sqlite.js');
 
 var fs = require('fs');
 
