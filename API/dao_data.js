@@ -188,6 +188,8 @@ DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
     }
     if (finalize) {
         stmt.exec(callback,dao);
+    } else {
+        callback(null,dao);
     }
 
 
@@ -209,13 +211,14 @@ DAO_DATA.prototype.update = function (callback,stmt,finalize) {
         stmt = this.db.stmt(true);
         finalize = true;
     }
-
     var self = this;
 
     if (!this.id) { // If id is null, create the data
-        this.create(self,function(err,args){
+        this.create_dao(self,function(err,args){
             if (!err) {
                 self._update(callback,stmt,finalize,false);
+            } else {
+                callback(err,args);
             }
         },stmt);
     } else {
@@ -230,6 +233,8 @@ DAO_DATA.prototype.update = function (callback,stmt,finalize) {
 DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
     // 1 - If the object is already in database :
     //  update user in Data (with id of object as key),
+    var dao = this;
+
     if (update) {
         stmt.update({
             table:'Data',
@@ -265,7 +270,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                 return;
             }
             // 2 - For all sub-object, call update
-            this.value[label].update(null,stmt,false);
+            this.value[label].update(function(){},stmt,false);
             // 3 - If object already in database, update relations in Compounds_Data (update the id of sub-object (know as 'data'))
             if (update) {
                 stmt.update({
@@ -295,6 +300,8 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
         if (finalize) {
             stmt.exec(callback);
 
+        } else {
+            callback(null,dao);
         }
     } else if(this.type == 'Model') { // Model
 
@@ -312,14 +319,14 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
             if (!err) {
                 // Because we (may) have async call (in sub object calling) but need to do all things as sync traitement, we will use a recursive function to treate all avaibles values of all labels of the object
 
-                var labels = new Array();
+                var labels = Object.keys(dao.value);
                 var m = 0 // label
                 var n = 0 // avaible value for a label m
                 var label = labels[m];
                 var ids = new Array();
 
                 for (lab in dao.value) {
-                    if (dao.value[lab] instanceof Array()) {
+                    if (dao.value[lab] instanceof Array) {
                         labels.push(lab);
                         for (var i = 0; i < dao.value[lab].length; i++) {
                             // DETECTION OF CYCLE WITH DAO ID
@@ -348,7 +355,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                 }
 
 
-                for (var i = 0; i < results.length; i++) {
+                for (var i = 0; i < args.length; i++) {
                     if (args[i].label == label) {
                         ids.push(args[i].id);
                     }
@@ -385,6 +392,8 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                             if (m == labels.length) {
                                 if (finalize) {
                                     stmt.exec(callback);
+                                } else {
+                                    callback(null,dao);
                                 }
                                 return;
                             }
@@ -392,7 +401,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                             n = 0;
 
                             ids = new Array();
-                            for (var i = 0; i < results.length; i++) {
+                            for (var i = 0; i < args.length; i++) {
                                 if (args[i].label == label) {
                                     ids.push(args[i].id);
                                 }
@@ -453,9 +462,16 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
         });
         if (finalize) {
             stmt.exec(callback);
-
+        } else {
+            callback(null,dao);
         }
 
+    } else {
+        if (finalize) {
+            stmt.exec(callback);
+        } else {
+            callback(null,dao);
+        }
     }
 
 }

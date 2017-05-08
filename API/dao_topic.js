@@ -83,6 +83,8 @@ DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
             });
             if (finalize) {
                 stmt.exec(callback,dao);
+            } else {
+                callback(null,dao);
             }
         } else {
             callback(err,args)
@@ -103,7 +105,7 @@ DAO_TOPIC.prototype.update = function(callback,stmt,finalize){
         finalize = true;
     }
     if (!this.id) {
-        this.create(this,callback,stmt);
+        this.create_dao(this,callback,stmt);
         if (finalize) {
             stmt.exec(callback);
         }

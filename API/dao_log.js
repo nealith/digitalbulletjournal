@@ -104,7 +104,7 @@ DAO_LOG.prototype.update = function(callback,stmt,finalize){
         finalize = true;
     }
     if (!this.id) {
-        this.create(this,callback,stmt);
+        this.create_dao(this,callback,stmt);
         if (finalize) {
             stmt.exec(callback);
         }
@@ -125,6 +125,8 @@ DAO_LOG.prototype.update = function(callback,stmt,finalize){
                 });
                 if (finalize) {
                     stmt.exec(callback);
+                } else {
+                    callback(null,dao);
                 }
             } else {
                 callback(err,args)
@@ -239,7 +241,6 @@ DAO_LOG.prototype.get = function(id,callback){
 }
 
 DAO_LOG.prototype.get_all = function(user,callback){
-
 
     if (user) {
         this.db.select({

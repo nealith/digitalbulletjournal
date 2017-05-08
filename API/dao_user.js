@@ -80,7 +80,7 @@ DAO_USER.prototype.update = function(callback,stmt,finalize){
         finalize = true;
     }
     if (!this.id) {
-        this.create(this,callback,stmt);
+        this.create_dao(this,callback,stmt);
     } else {
         stmt.update({
             table:'Users',
@@ -98,6 +98,8 @@ DAO_USER.prototype.update = function(callback,stmt,finalize){
     }
     if (finalize) {
         stmt.exec(callback);
+    } else {
+        callback(null,dao);
     }
 
 
@@ -195,9 +197,13 @@ DAO_USER.prototype.get = function(id,callback){
         values:null
     },function(err,args){
         if(!err){
-            dao = new DAO_USER(db,null,args[0].first_name,args[0].last_name,args[0].password,args[0].nick_name,args[0].e_mail);
-            dao.id = args[0].id;
-            callback(err,dao);
+            if (args.length>0) {
+                dao = new DAO_USER(db,null,args[0].first_name,args[0].last_name,args[0].password,args[0].nick_name,args[0].e_mail);
+                dao.id = args[0].id;
+                callback(err,dao);
+            } else {
+                callback('no rows returned',args);
+            }
         }else{
             callback(err,args)
         }
