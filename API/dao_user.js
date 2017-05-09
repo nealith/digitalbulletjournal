@@ -53,6 +53,7 @@ DAO_USER.prototype.create_dao = function(dao,callback,stmt){
         table:'Users',
         keys:null,
         values:{
+            id:dao.id,
             creation_date:dao.creation_date,
             first_name:dao.first_name,
             last_name:dao.last_name,
@@ -133,11 +134,23 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
     var recursive_callback_delete_logs = function(err,args){
         if (!err) {
             m++;
-            if (m == dao_logs.length) {
+            if (m >= dao_logs.length) {
                 dao_log_user.get_all(self.id,null,function(err,args){
                     if (!err) {
-                        dao_logs_users = args
-                        dao_logs_users[n].delete(recursive_callback_delete_user_relations,stmt,false);
+                        dao_logs_users = new Array();
+                        if (args.length>0) {
+                            for (var i = 0; i < args.length; i++) {
+                                var tmp_dao = new DAO_LOG_USER(self.db,null,null,null,args[i].writting_rights,args[i].admin_rights);
+                                tmp_dao.user = args[i].user;
+                                tmp_dao.log = args[i].log;
+                                tmp_dao.adding_date = args[i].adding_date;
+                                dao_logs_users.push(tmp_dao);
+                            }
+                            dao_logs_users[n].delete(recursive_callback_delete_user_relations,stmt,false);
+                        } else {
+                            recursive_callback_delete_user_relations(null,null);
+                        }
+
                     } else {
                         callback(err,args);
                     }
@@ -153,16 +166,18 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
     var recursive_callback_delete_user_relations = function(err,args){
         if (!err) {
             n++
-            if (n == dao_logs_users.length) {
+            if (n >= dao_logs_users.length) {
                 stmt.delete({
                     table:'Users',
                     keys:{
-                        id:this.id
+                        id:self.id
                     },
                     values:null
                 });
                 if (finalize) {
                     stmt.exec(callback);
+                } else {
+                    callback(null,null);
                 }
             } else {
                 dao_logs_users[n].delete(recursive_callback_delete_user_relations,stmt,false);
@@ -174,8 +189,20 @@ DAO_USER.prototype.delete = function(callback,stmt,finalize){
 
     dao_log.get_all(self.id,function(err,args){
         if (!err) {
-            dao_logs = args
-            dao_logs[m].delete(recursive_callback_delete_logs,stmt,false);
+            dao_logs = new Array();
+            if (args.length > 0) {
+
+                for (var i = 0; i < args.length; i++) {
+                    var tmp_dao = new DAO_LOG(self.db,null,null,args[i].owner,args[i].privacy,args[i].title);
+                    tmp_dao.id = args[i].id;
+                    tmp_dao.creation_date = args[i].creation_date;
+                    dao_logs.push(tmp_dao);
+                }
+                dao_logs[m].delete(recursive_callback_delete_logs,stmt,false);
+            } else {
+                recursive_callback_delete_logs(null,null);
+            }
+
         } else {
             callback(err,args);
         }
@@ -198,12 +225,14 @@ DAO_USER.prototype.get = function(id,callback){
     },function(err,args){
         if(!err){
             if (args.length>0) {
-                dao = new DAO_USER(db,null,args[0].first_name,args[0].last_name,args[0].password,args[0].nick_name,args[0].e_mail);
+                dao = new DAO_USER(db,null,null,args[0].first_name,args[0].last_name,args[0].password,args[0].nick_name,args[0].e_mail);
                 dao.id = args[0].id;
-                callback(err,dao);
+                dao.creation_date = args[0].creation_date;
             } else {
-                callback('no rows returned',args);
+                err = 'No user with this id';
+                dao = null;
             }
+            callback(err,dao);
         }else{
             callback(err,args)
         }

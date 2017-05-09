@@ -19,8 +19,18 @@ var DAO_LOG_USER = function(db,user,log,callback,writting_rights,admin_rights){
     } else {
         this.user = null;
         this.writting_rights = writting_rights;
+        if (this.writting_rights == 0) {
+            this.writting_rights = true;
+        } else if(this.writting_rights == 1){
+            this.writting_rights = false;
+        }
         this.log = null;
         this.admin_rights = admin_rights;
+        if (this.admin_rights == 0) {
+            this.admin_rights = true;
+        } else if(this.admin_rights == 1){
+            this.admin_rights = false;
+        }
         this.is_create = false;
     }
 
@@ -53,7 +63,8 @@ DAO_LOG_USER.prototype.create_dao = function(dao,callback,stmt){
             adding_date:dao.adding_date,
             writting_rights:dao.writting_rights,
             admin_rights:dao.admin_rights,
-            log:dao.log
+            log:dao.log,
+            user:dao.user
         }
     });
     if (finalize) {
@@ -132,12 +143,22 @@ DAO_LOG_USER.prototype.delete = function(callback,stmt,finalize){
 
     var recursive_callback_update_data;
 
-    var recursive_callback_update_topic = function(){
+    var recursive_callback_update_topic = function(err,args){
         if (!err) {
             n++;
             if (n == all_topics.length) {
+                stmt.delete({
+                    table:'Logs_Users',
+                    keys:{
+                        user:self.user,
+                        log:self.log
+                    },
+                    values:null
+                });
                 if (finalize) {
                     stmt.exec(callback);
+                } else {
+                    callback(null,null);
                 }
             } else {
             m = 0;
@@ -182,11 +203,10 @@ DAO_LOG_USER.prototype.delete = function(callback,stmt,finalize){
             callback(err,args);
         }
     }
-
     dao_log.get(self.log,function(err,args){
         if (!err) {
             log = args;
-            dao_topic.get_all_log(self.log,function(err,args){
+            dao_topic.get_all(self.log,function(err,args){
                 if (!err) {
                     all_topics = args;
                     recursive_callback_update_topic();
@@ -217,9 +237,16 @@ DAO_LOG_USER.prototype.get = function(user,log,callback){
         values:null
     },function(err,args){
         if(!err){
-            dao = new DAO_LOG_USER(db,null,null,args[0].writting_rights,args[0].admin_rights);
-            dao.user = args[0].user;
-            dao.log = args[0].log
+            if (args.length > 0) {
+                dao = new DAO_LOG_USER(db,null,null,null,args[0].writting_rights,args[0].admin_rights);
+                dao.user = args[0].user;
+                dao.log = args[0].log;
+                dao.is_create = true;
+            } else {
+                err = 'No log_user with this user and log';
+                dao = null;
+            }
+
             callback(err,dao);
         }else{
             callback(err,args)

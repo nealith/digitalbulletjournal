@@ -20,6 +20,11 @@ var DAO_LOG = function(db,id,callback,owner,privacy,title){
     } else {
         this.id = null;
         this.privacy = privacy;
+        if (this.privacy == 0) {
+            this.privacy = true;
+        } else if(this.privacy == 1){
+            this.privacy = false;
+        }
         this.owner = owner;
         this.title = title;
     }
@@ -75,6 +80,7 @@ DAO_LOG.prototype.create_dao = function(dao,callback,stmt){
                 table:'Logs',
                 keys:null,
                 values:{
+                    id:dao.id,
                     creation_date:dao.creation_date,
                     privacy:dao.privacy,
                     title:dao.title,
@@ -165,13 +171,20 @@ DAO_LOG.prototype.delete = function(callback,stmt,finalize){
     var recursive_callback_delete_topics = function(err,args){
         if (!err) {
             m++;
-            if (m == dao_topics.length) {
+            if (m >= dao_topics.length) {
                 dao_log_user.get_all(self.id,null,function(err,args){
-                    if (!err) {
-                        dao_logs_users = args
-                        dao_logs_users[n].delete(recursive_callback_delete_log_relations,stmt,false);
+                    dao_logs_users = new Array();
+                    if (args.length>0) {
+                        for (var i = 0; i < args.length; i++) {
+                            var tmp_dao = new DAO_LOG_USER(self.db,null,null,null,args[i].writting_rights,args[i].admin_rights);
+                            tmp_dao.user = args[i].user;
+                            tmp_dao.log = args[i].log;
+                            tmp_dao.adding_date = args[i].adding_date;
+                            dao_logs_users.push(tmp_dao);
+                        }
+                        dao_logs_users[n].delete(recursive_callback_delete_user_relations,stmt,false);
                     } else {
-                        callback(err,args);
+                        recursive_callback_delete_log_relations(null,null);
                     }
                 });
             } else {
@@ -185,16 +198,18 @@ DAO_LOG.prototype.delete = function(callback,stmt,finalize){
     var recursive_callback_delete_log_relations = function(err,args){
         if (!err) {
             n++
-            if (n == dao_logs_users.length) {
+            if (n >= dao_logs_users.length) {
                 stmt.delete({
                     table:'Logs',
                     keys:{
-                        id:this.id
+                        id:self.id
                     },
                     values:null
                 });
                 if (finalize) {
                     stmt.exec(callback);
+                } else {
+                    callback(null,null);
                 }
             } else {
                 dao_logs_users[n].delete(recursive_callback_delete_log_relations,stmt,false);
@@ -206,8 +221,18 @@ DAO_LOG.prototype.delete = function(callback,stmt,finalize){
 
     dao_topic.get_all(self.id,function(err,args){
         if (!err) {
-            dao_topics = args
-            dao_topics[m].delete(recursive_callback_delete_topics,stmt,false);
+            dao_topics = new Array();
+            if (args.length > 0) {
+                for (var i = 0; i < args.length; i++) {
+                    var tmp_dao = new DAO_TOPIC(self.db,null,null,args[i].log,args[i].title);
+                    tmp_dao.id = args[i].id;
+                    tmp_dao.creation_date = args[i].creation_date;
+                    dao_topics.push(tmp_dao);
+                }
+                dao_topics[m].delete(recursive_callback_delete_topics,stmt,false);
+            } else {
+                recursive_callback_delete_topics(null,null)
+            }
         } else {
             callback(err,args);
         }
@@ -223,15 +248,21 @@ DAO_LOG.prototype.get = function(id,callback){
     var db = this.db;
 
     this.db.select({
-        table:'Users',
+        table:'Logs',
         keys:{
             id:id
         },
         values:null
     },function(err,args){
         if(!err){
-            dao = new DAO_LOG(db,null,args[0].owner,args[0].privacy,args[0].title);
-            dao.id = args[0].id;
+            if (args.length > 0) {
+                dao = new DAO_LOG(db,null,null,args[0].owner,args[0].privacy,args[0].title);
+                dao.id = args[0].id;
+            } else {
+                err = 'No log with this id';
+                dao = null;
+            }
+
             callback(err,dao);
         }else{
             callback(err,args)

@@ -54,7 +54,7 @@ MYSQL_DB.prototype.select = function(args,callback){
 
 MYSQL_DB.prototype.select_all = function(args,callback){
     var query = this.utils.select_all(args);
-    this.db.all(query.sql,query.params,callback);
+    this.db.all(query.sql,callback);
 }
 
 MYSQL_DB.prototype.stmt = function(transaction){

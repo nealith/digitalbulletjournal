@@ -73,7 +73,7 @@ SQLITE_DB.prototype.select = function(args,callback){
 
 SQLITE_DB.prototype.select_all = function(args,callback){
     var query = this.utils.select_all(args);
-    this.db.all(query.sql,query.params,callback);
+    this.db.all(query.sql,callback);
 }
 
 SQLITE_DB.prototype.stmt = function(transaction){

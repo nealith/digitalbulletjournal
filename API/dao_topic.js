@@ -76,6 +76,7 @@ DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
                 table:'Topics',
                 keys:null,
                 values:{
+                    id:dao.id,
                     creation_date:dao.creation_date,
                     title:dao.title,
                     log:dao.log
@@ -159,11 +160,20 @@ DAO_TOPIC.prototype.delete = function(callback,stmt,finalize){
         if (!err) {
             m++;
             if (m == all_data.length) {
+                stmt.delete({
+                    table:'Topics',
+                    keys:{
+                        id:self.id
+                    },
+                    values:null
+                });
                 if (finalize) {
                     stmt.exec(callback);
+                } else {
+                    callback(null,null);
                 }
             } else {
-                dao_data.get(all_data[m],function(err,args){
+                dao_data.get(all_data[m].id,function(err,args){
                     if (!err) {
                         args.delete(recursive_callback_delete_data,stmt,false);
                     } else {
@@ -180,7 +190,7 @@ DAO_TOPIC.prototype.delete = function(callback,stmt,finalize){
         if (!err) {
             all_data = args;
             // Launch call on recursive_callback_delete_data
-            dao_data.get(all_data[m],function(err,args){
+            dao_data.get(all_data[m].id,function(err,args){
                 if (!err) {
                     args.delete(recursive_callback_delete_data,stmt,false);
                 } else {
@@ -202,15 +212,22 @@ DAO_TOPIC.prototype.get = function(id,callback){
     var db = this.db;
 
     this.db.select({
-        table:'Users',
+        table:'Topics',
         keys:{
             id:id
         },
         values:null
     },function(err,args){
         if(!err){
-            dao = new DAO_TOPIC(db,null,args[0].log,args[0].title);
-            dao.id = args[0].id;
+            if (args.length > 0) {
+                dao = new DAO_TOPIC(db,null,null,args[0].log,args[0].title);
+                dao.id = args[0].id;
+
+            } else {
+                err = 'No topic with this id';
+                dao = null;
+            }
+
             callback(err,dao);
         }else{
             callback(err,args)

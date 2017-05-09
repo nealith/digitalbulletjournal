@@ -31,6 +31,7 @@ var TESTS = function(name,tests,pre,callback){
     var m = 0;
 
     var next = function(err,args){
+
         if (!err) {
             if (args) {
 
@@ -82,12 +83,12 @@ var TESTS = function(name,tests,pre,callback){
 
         callback();
     }
-
     if (tests.length == 1) {
         pre(function(err,args){
             if(!err){
                 tests[m].exec(args,result);
             } else {
+                console.log(err,args);
                 callback('err with pre function',null);
             }
         });
@@ -97,6 +98,7 @@ var TESTS = function(name,tests,pre,callback){
             if(!err){
                 tests[m].exec(args,next);
             } else {
+                console.log(err,args);
                 callback('err with pre function',null);
             }
         });
@@ -110,6 +112,60 @@ var TESTS = function(name,tests,pre,callback){
 // FULL DATA BASE
 
 function full_db(callback){
+
+    function delete_all_users(callback){
+        dao_user.get_all(function(err,args){
+            if (!err) {
+                var rows = args;
+                var m = 0;
+                var recu = function(err,args){
+                    if (!err) {
+                        m++;
+                        if (m >= rows.length) {
+                            callback(err,args);
+                        } else if (rows[m].id != 'root') {
+
+                            dao_user.get(rows[m].id,function(err,args){
+
+                                if (!err) {
+
+                                    args.delete(recu);
+                                } else {
+                                    callback(err,args);
+                                }
+                            })
+                        } else {
+                            recu(null,null);
+                        }
+                    } else {
+                        callback(err,args);
+                    }
+
+                }
+                while(m < rows.length && rows[m].id == 'root'){
+                    m++;
+                }
+                if (m < rows.length && rows[m].id != 'root') {
+                    dao_user.get(rows[m].id,function(err,args){
+                        if (!err) {
+                            args.delete(recu);
+                        } else {
+                            callback(err,args);
+                        }
+                    })
+                } else {
+                    callback(err,args);
+                }
+
+            } else {
+                callback(err,args);
+            }
+        })
+
+
+
+    }
+
     // Create users
 
     var users = new Array();
@@ -142,7 +198,7 @@ function full_db(callback){
         var n = 5;
         function create_log(err,args){
             if (!err) {
-                logs.push(args);
+                logs[m-2] = args;
                 m++;
 
                 if (m == n) {
@@ -177,7 +233,7 @@ function full_db(callback){
         var n = 5;
         function create_topic(err,args){
             if (!err) {
-                topics.push(args);
+                topics[m-2] = args;
                 m++;
                 if (m == n) {
                     callback(err,args);
@@ -299,22 +355,26 @@ function full_db(callback){
         data[data.length-1].update(create_data);
     }
 
-    create_users(function(err,args){
+    delete_all_users(function(err,args){
         if (!err) {
-
-            create_logs(function(err,args){
+            create_users(function(err,args){
                 if (!err) {
-                    create_topics(function(err,args){
+                    create_logs(function(err,args){
                         if (!err) {
-
-                            share_logs(function(err,args){
+                            create_topics(function(err,args){
                                 if (!err) {
-                                    create_simples_data(function(err,args){
+                                    share_logs(function(err,args){
                                         if (!err) {
-                                            create_compounds_data(function(err,args){
+                                            create_simples_data(function(err,args){
                                                 if (!err) {
-                                                    create_models_data(function(err,args){
-                                                        callback(err,{users:users,logs:logs,topics:topics});
+                                                    create_compounds_data(function(err,args){
+                                                        if (!err) {
+                                                            create_models_data(function(err,args){
+                                                                callback(err,{users:users,logs:logs,topics:topics});
+                                                            });
+                                                        } else {
+                                                            callback(err,args)
+                                                        }
                                                     });
                                                 } else {
                                                     callback(err,args)
@@ -337,7 +397,7 @@ function full_db(callback){
                 }
             });
         } else {
-            callback(err,args)
+            callback(err,args);
         }
     });
 }
@@ -353,10 +413,6 @@ function full_db(callback){
         dao_user.create('toto','toto','toto','toto','toto'+'@users.com',function(err,args){
             if (!err) {
                 user = args;
-
-                dao_user.get_all(function(err,args){
-                    console.log(err,args);
-                });
 
                 dao_user.get(user.id,function(err,args){
                     if (!err) {
@@ -429,7 +485,7 @@ function full_db(callback){
 
     function delete_user(args,callback){
         var users = args.users;
-        dao_user.delete(function(err,args){
+        users[0].delete(function(err,args){
             if (!err) {
                 dao_user.get(users[0].id,function(err,args){
                     if (err) {
@@ -446,7 +502,7 @@ function full_db(callback){
 
     // Delete a user with log and and without shared log
 
-    function delete_shared_log(args,callback){
+    function delete_user_log(args,callback){
         var users = args.users;
         var logs = args.logs;
         users[3].delete(function(err,args){
@@ -472,10 +528,10 @@ function full_db(callback){
 
     // Delete a user with shared log and without log
 
-    function delete_shared_log(args,callback){
+    function delete_user_shared(args,callback){
         var users = args.users;
         var logs = args.logs;
-        dao_user.delete(function(err,args){
+        users[1].delete(function(err,args){
             if (!err) {
                 dao_user.get(users[1].id,function(err,args){
                     if (err) {
@@ -498,16 +554,16 @@ function full_db(callback){
 
     // Delete a user with shared log and log
 
-    function delete_user_log_shared_log(args,callback){
+    function delete_user_log_shared(args,callback){
         var users = args.users;
         var logs = args.logs;
-        dao_user.delete(function(err,args){
+        users[2].delete(function(err,args){
             if (!err) {
                 dao_user.get(users[2].id,function(err,args){
                     if (err) {
                         dao_log_user.get(users[2].id,logs[2].id,function(err,args){
                             if(err){
-                                dao_log.get(logs[2].id,function(err,args){
+                                dao_log.get(logs[0].id,function(err,args){
                                     if(err){
                                         callback(null,true);
                                     } else {
@@ -535,7 +591,7 @@ function full_db(callback){
         users[0].first_name='toto33';
         users[0].update(function(err,args){
             if (!err) {
-                dao_user.get(users[0].id,function(err,agrs){
+                dao_user.get(users[0].id,function(err,args){
                     if (!err) {
                         if (users[0].equal(args)) {
                             callback(err,true);
@@ -618,40 +674,22 @@ var fs = require('fs');
 
 var script = fs.readFileSync('./database_v2.sql', 'utf8');
 
-var sqlite_db = new SQLITE_DB(':memory:');
+var sqlite_db = new SQLITE_DB('./test/test.db');
 dao_user = new DT_API.DAO_USER(sqlite_db);
 dao_log = new DT_API.DAO_LOG(sqlite_db);
 dao_topic = new DT_API.DAO_TOPIC(sqlite_db);
 dao_log_user = new DT_API.DAO_LOG_USER(sqlite_db);
 dao_data = new DT_API.DAO_DATA(sqlite_db);
-sqlite_db.db.exec(script,function(err,args){
-    if (!err) {
-        full_db(function(err,args){
-            var tests = new TESTS('test sqlite',[
-                new TEST('Create a user with create()',create_user),
-                new TEST('Create a user with new() and create_dao()',create_user_dao),
-                new TEST('Create a user with new() and update()',create_user_update),
-                new TEST('Delete a user without log and without shared log',delete_user),
-                new TEST('Delete a user with log and and without shared log',delete_shared_log),
-                new TEST('Delete a user with shared log and without log',delete_shared_log),
-                new TEST('Delete a user with shared log and log',delete_user_log_shared_log),
-                new TEST('Update a user',update_user)
-            ],function(callback){
-                sqlite_db.db.exec(script,function(err,args){
-                    if (!err) {
-                        full_db(callback);
-                    } else {
-                        callback(err,args);
-                    }
 
-                });
-            },function(){
-                console.log('the end');
-            })
-        });
-    } else {
-        console.log(err);
-
-    }
-
+var tests = new TESTS('test sqlite',[
+    new TEST('Create a user with create()',create_user),
+    new TEST('Create a user with new() and create_dao()',create_user_dao),
+    new TEST('Create a user with new() and update()',create_user_update),
+    new TEST('Delete a user without log and without shared log',delete_user),
+    new TEST('Delete a user with log and and without shared log',delete_user_log),
+    new TEST('Delete a user with shared log and without log',delete_user_shared),
+    new TEST('Delete a user with shared log and log',delete_user_log_shared),
+    new TEST('Update a user',update_user)
+],full_db,function(err,args){
+    console.log('the end');
 });

@@ -63,7 +63,10 @@ DB_TRANSACTION_STATEMENT.prototype.exec = function (callback,callback_args) {
                             callback(err,args);
                         });
                     } else {
-                        self.db.run('ROLLBACK;',callback);
+                        var rollback_err = err;
+                        self.db.run('ROLLBACK;',function(err,args){
+                            callback(rollback_err,args);
+                        });
                     }
 
                 }

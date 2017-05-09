@@ -68,7 +68,6 @@ DB_UTILS.prototype.delete = function (args) {
     }
     query.sql += (keys_query+';');
     query.params = keys_values;
-    console.log(query);
     return query;
 };
 
@@ -137,7 +136,7 @@ DB_UTILS.prototype.select = function (args) {
 
 DB_UTILS.prototype.select_all = function(args){
     var query = new Object();
-    query.sql = 'SELECT * FROM '+args.table+'; ';
+    query.sql = 'SELECT * FROM '+args.table+';';
     query.params = null;
     return query;
 }

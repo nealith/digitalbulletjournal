@@ -16,7 +16,7 @@
 -- List of application's Users
 DROP TABLE IF EXISTS `Users`;
 CREATE TABLE Users(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     password VARCHAR(64) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE Users(
 
 DROP TABLE IF EXISTS `Logs`;
 CREATE TABLE Logs(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     creation_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
     owner VARCHAR(64) NOT NULL,
     privacy BOOLEAN NOT NULL,
@@ -45,8 +45,8 @@ CREATE TABLE Logs(
 
 DROP TABLE IF EXISTS `Logs_Users`;
 CREATE TABLE Logs_Users(
-    user SERIAL NOT NULL,
-    log SERIAL NOT NULL,
+    user VARCHAR(64) NOT NULL,
+    log VARCHAR(64) NOT NULL,
     writting_rights BOOLEAN NOT NULL,
     admin_rights BOOLEAN NOT NULL,
     adding_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
@@ -57,7 +57,7 @@ CREATE TABLE Logs_Users(
 
 DROP TABLE IF EXISTS `Topics`;
 CREATE TABLE Topics(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     title VARCHAR(64) NOT NULL,
     log SERIAL NOT NULL,
     creation_date TIMESTAMP NOT NULL, --DEFAULT CURRENT_TIMESTAMP
@@ -70,7 +70,7 @@ CREATE TABLE Topics(
 
 DROP TABLE IF EXISTS `Data`;
 CREATE TABLE Data(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     topic SERIAL NOT NULL,
     user VARCHAR(64) NOT NULL,
     type VARCHAR(10) NOT NULL,
@@ -87,7 +87,7 @@ CREATE TABLE Data(
 
 DROP TABLE IF EXISTS `DataTexts`;
 CREATE TABLE DataTexts(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     value VARCHAR(1000) NOT NULL,
     CONSTRAINT datatexts_pk PRIMARY KEY (id),
     CONSTRAINT datatexts_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -97,7 +97,7 @@ CREATE TABLE DataTexts(
 
 DROP TABLE IF EXISTS `DataDates`;
 CREATE TABLE DataDates(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     value DATE NOT NULL,
     CONSTRAINT datatexts_pk PRIMARY KEY (id),
     CONSTRAINT datatexts_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -107,7 +107,7 @@ CREATE TABLE DataDates(
 
 DROP TABLE IF EXISTS `DataBooleans`;
 CREATE TABLE DataBooleans(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     value BOOLEAN NOT NULL,
     CONSTRAINT databoolean_pk PRIMARY KEY (id),
     CONSTRAINT databoolean_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -117,7 +117,7 @@ CREATE TABLE DataBooleans(
 
 DROP TABLE IF EXISTS `DataNumbers`;
 CREATE TABLE DataNumbers(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     value NUMERIC NOT NULL,
     CONSTRAINT datanumbers_pk PRIMARY KEY (id),
     CONSTRAINT datanumbers_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -127,7 +127,7 @@ CREATE TABLE DataNumbers(
 
 DROP TABLE IF EXISTS `DataCompounds`;
 CREATE TABLE DataCompounds(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     model VARCHAR(64),
     CONSTRAINT datacomplexe_pk PRIMARY KEY (id),
     CONSTRAINT datacomplexe_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -136,7 +136,7 @@ CREATE TABLE DataCompounds(
 
 DROP TABLE IF EXISTS `DataModels`;
 CREATE TABLE DataModels(
-    id VARCHAR(64),
+    id VARCHAR(64) NOT NULL,
     CONSTRAINT datamodel_pk PRIMARY KEY (id),
     CONSTRAINT datamodel_fk FOREIGN KEY (id) REFERENCES Data(id)
 );
@@ -167,8 +167,8 @@ VALUES ("root","root","root","root","root",0,"root");
 INSERT INTO Logs (id,title,owner,creation_date,privacy)
 VALUES ("root_log","root_log","root",0,1);
 
-INSERT INTO Topics (id,title,log)
-VALUES ("root_topic","root_topic","root_log");
+INSERT INTO Topics (id,title,log,creation_date)
+VALUES ("root_topic","root_topic","root_log",0);
 
 INSERT INTO Data (id,log_datetime,topic,user,type)
 VALUES ("Text",0,"root_topic","root","None");
