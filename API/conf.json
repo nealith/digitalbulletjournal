@@ -1,0 +1,11 @@
+{
+    "db":{
+        "type":"sqlite",
+        "sqlite":{
+            "path":"./database.db"
+        }
+    },
+    "plugins":[
+        
+    ]
+}
