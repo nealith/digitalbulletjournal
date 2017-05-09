@@ -1,7 +1,5 @@
 var DT_API = require('../api.js');
 
-
-
 var dao_user;
 var dao_log;
 var dao_topic;
@@ -355,17 +353,22 @@ function full_db(callback){
         dao_user.create('toto','toto','toto','toto','toto'+'@users.com',function(err,args){
             if (!err) {
                 user = args;
+
+                dao_user.get_all(function(err,args){
+                    console.log(err,args);
+                });
+
                 dao_user.get(user.id,function(err,args){
                     if (!err) {
                         if (user.equal(args)) {
-                            report('Create a user with create()',true);
+                            callback(err,true);
                         } else {
-                            report('Create a user with create()',false);
+                            callback(err,false);
                         }
                     } else {
                         callback(err,args);
                     }
-                })
+                });
             } else {
                 callback(err,args);
             }
@@ -609,11 +612,6 @@ function full_db(callback){
     // Get a model data
 
 
-
-
-
-
-
 var SQLITE_DB = require('../libdbj_db_sqlite.js');
 
 var fs = require('fs');
@@ -629,7 +627,6 @@ dao_data = new DT_API.DAO_DATA(sqlite_db);
 sqlite_db.db.exec(script,function(err,args){
     if (!err) {
         full_db(function(err,args){
-            console.log(err,args);
             var tests = new TESTS('test sqlite',[
                 new TEST('Create a user with create()',create_user),
                 new TEST('Create a user with new() and create_dao()',create_user_dao),
@@ -641,7 +638,12 @@ sqlite_db.db.exec(script,function(err,args){
                 new TEST('Update a user',update_user)
             ],function(callback){
                 sqlite_db.db.exec(script,function(err,args){
-                    full_db(callback);
+                    if (!err) {
+                        full_db(callback);
+                    } else {
+                        callback(err,args);
+                    }
+
                 });
             },function(){
                 console.log('the end');
