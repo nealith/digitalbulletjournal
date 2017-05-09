@@ -78,7 +78,7 @@ SQLITE_DB.prototype.select_all = function(args,callback){
 
 SQLITE_DB.prototype.stmt = function(transaction){
 
-    return new  this.DB_TRANSACTION_STATEMENT(this.db,this.utils,transaction);
+    return new this.DB_TRANSACTION_STATEMENT(this.db,this.utils,transaction);
 }
 
 module.exports = SQLITE_DB;
