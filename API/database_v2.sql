@@ -128,7 +128,6 @@ CREATE TABLE DataNumbers(
 DROP TABLE IF EXISTS `DataCompounds`;
 CREATE TABLE DataCompounds(
     id VARCHAR(64),
-    name VARCHAR(64) NOT NULL,
     model VARCHAR(64),
     CONSTRAINT datacomplexe_pk PRIMARY KEY (id),
     CONSTRAINT datacomplexe_fk FOREIGN KEY (id) REFERENCES Data(id)
@@ -138,7 +137,6 @@ CREATE TABLE DataCompounds(
 DROP TABLE IF EXISTS `DataModels`;
 CREATE TABLE DataModels(
     id VARCHAR(64),
-    name VARCHAR(64) NOT NULL,
     CONSTRAINT datamodel_pk PRIMARY KEY (id),
     CONSTRAINT datamodel_fk FOREIGN KEY (id) REFERENCES Data(id)
 );
@@ -162,3 +160,30 @@ CREATE TABLE Models_Data(
     CONSTRAINT modeldata_fk FOREIGN KEY (parent) REFERENCES DataCompound(id),
     CONSTRAINT modeldata_pk UNIQUE (label,parent,data)
 );
+
+INSERT INTO Users (id,password,first_name,last_name,nick_name,creation_date,e_mail)
+VALUES ("root","root","root","root","root",0,"root");
+
+INSERT INTO Logs (id,title,owner,creation_date,privacy)
+VALUES ("root_log","root_log","root",0,1);
+
+INSERT INTO Topics (id,title,log)
+VALUES ("root_topic","root_topic","root_log");
+
+INSERT INTO Data (id,log_datetime,topic,user,type)
+VALUES ("Text",0,"root_topic","root","None");
+
+INSERT INTO Data (id,log_datetime,topic,user,type)
+VALUES ("Date",0,"root_topic","root","None");
+
+INSERT INTO Data (id,log_datetime,topic,user,type)
+VALUES ("Boolean",0,"root_topic","root","None");
+
+INSERT INTO Data (id,log_datetime,topic,user,type)
+VALUES ("Number",0,"root_topic","root","None");
+
+INSERT INTO Data (id,log_datetime,topic,user,type)
+VALUES ("Compound",0,"root_topic","root","None");
+
+INSERT INTO Data (id,log_datetime,topic,user,type)
+VALUES ("Model",0,"root_topic","root","None");
