@@ -41,7 +41,7 @@ DAO_USER.prototype.regen = function (dao) {
     return dao_tmp;
 }
 
-DAO_USER.prototype.create_dao = function(dao,callback,stmt){
+DAO_USER.prototype.create_dao = function(dao,callback,stmt,finalize){
     shasum = require('shasum');
     dao.creation_date = Date.now();
     dao.id = shasum(dao.first_name+dao.last_name+dao.creation_date);
@@ -67,7 +67,7 @@ DAO_USER.prototype.create_dao = function(dao,callback,stmt){
     }
 }
 
-DAO_USER.prototype.create = function(first_name,last_name,password,nick_name,e_mail,callback,stmt){
+DAO_USER.prototype.create = function(first_name,last_name,password,nick_name,e_mail,callback,stmt,finalize){
 
     var dao = new DAO_USER(this.db,null,null,first_name,last_name,password,nick_name,e_mail);
     this.create_dao(dao,callback,stmt);

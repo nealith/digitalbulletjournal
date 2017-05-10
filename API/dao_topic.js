@@ -60,7 +60,7 @@ DAO_TOPIC.prototype.title_avaible = function(log,title,callback){
 
 
 
-DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
+DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt,finalize){
 
     shasum = require('shasum');
     dao.creation_date = Date.now();
@@ -93,9 +93,9 @@ DAO_TOPIC.prototype.create_dao = function(dao,callback,stmt){
     })
 }
 
-DAO_TOPIC.prototype.create = function(log,title,callback,stmt){
+DAO_TOPIC.prototype.create = function(log,title,callback,stmt,finalize){
     var dao = new DAO_TOPIC(this.db,null,null,log,title);
-    this.create_dao(dao,callback,stmt);
+    this.create_dao(dao,callback,stmt,finalize);
 
 }
 

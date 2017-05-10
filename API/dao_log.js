@@ -66,7 +66,7 @@ DAO_LOG.prototype.title_avaible = function(owner,title,callback){
 
 }
 
-DAO_LOG.prototype.create_dao = function(dao,callback,stmt){
+DAO_LOG.prototype.create_dao = function(dao,callback,stmt,finalize){
     shasum = require('shasum');
     dao.creation_date = Date.now();
     dao.id = shasum(dao.owner+dao.title+dao.creation_date);
@@ -96,7 +96,7 @@ DAO_LOG.prototype.create_dao = function(dao,callback,stmt){
     })
 }
 
-DAO_LOG.prototype.create = function(owner,privacy,title,callback,stmt){
+DAO_LOG.prototype.create = function(owner,privacy,title,callback,stmt,finalize){
 
     var dao = new DAO_LOG(this.db,null,null,owner,privacy,title);
     this.create_dao(dao,callback,stmt);

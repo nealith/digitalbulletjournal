@@ -139,7 +139,7 @@ DAO_DATA.prototype.regen = function (dao) {
     return dao_tmp;
 }
 
-DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
+DAO_DATA.prototype.create_dao = function(dao,callback,stmt,finalize){
     var finalize = false;
     shasum = require('shasum');
     dao.log_datetime = Date.now();
@@ -196,13 +196,13 @@ DAO_DATA.prototype.create_dao = function(dao,callback,stmt){
 
 }
 
-DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt) {
+DAO_DATA.prototype.create = function (topic,user,type,value,callback,stmt,finalize) {
 
     var dao = new DAO_DATA(this.db,null,null,topic,user,type,value);
     if (dao.type == 'Compound') {
         dao.model = value;
     }
-    this.create_dao(dao,callback,stmt);
+    this.create_dao(dao,callback,stmt,finalize);
 
 
 }
@@ -320,10 +320,10 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
             if (!err) {
                 // Because we (may) have async call (in sub object calling) but need to do all things as sync traitement, we will use a recursive function to treate all avaibles values of all labels of the object
 
-                var labels = Object.keys(dao.value);
+                var labels = new Array();
                 var m = 0 // label
                 var n = 0 // avaible value for a label m
-                var label = labels[m];
+                var label;
                 var ids = new Array();
 
                 for (lab in dao.value) {
@@ -437,7 +437,6 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                         n++;
 
                         // 5 - go the next value in label m
-
                         dao.value[label][n].update(recursif_callback_update,stmt,false);
 
                     } else {
@@ -445,8 +444,18 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                     }
                 }
                 // Do the first call to recursive function
+                if (labels.length > 0) {
+                    label = labels[m];
+                    dao.value[label][n].update(recursif_callback_update,stmt,false);
+                } else {
+                    if (finalize) {
+                        stmt.exec(callback);
+                    } else {
+                        callback(null,dao);
+                    }
+                    return;
+                }
 
-                dao.value[label][n].update(recursif_callback_update,stmt,false);
             } else {
                 callback(err,args);
             }

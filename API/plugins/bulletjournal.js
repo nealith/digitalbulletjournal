@@ -1,4 +1,4 @@
-var BUJO = function(db){
+var BUJO = function(db,callback){
 
     var DT = require('../api.js');
     var dao_user = DT.DAO_USER;
@@ -9,7 +9,7 @@ var BUJO = function(db){
     // User
 
     var user_id;
-    var user = new dao_user(db,null,'bujo','bujo','bujo','bujo','bujo@bujo.bujo');
+    var user = new dao_user(db,null,null,'bujo','bujo','bujo','bujo','bujo@bujo.bujo');
 
     // Log
 
@@ -27,16 +27,16 @@ var BUJO = function(db){
 
     task_value.state = new Array();
 
-    task_value.state.push(new dao_data(db,null,'bujo','bujo','Text','To Do'));
-    task_value.state.push(new dao_data(db,null,'bujo','bujo','Text','Planned'));
-    task_value.state.push(new dao_data(db,null,'bujo','bujo','Text','Postponed'));
-    task_value.state.push(new dao_data(db,null,'bujo','bujo','Text','Done'));
-    task_value.state.push(new dao_data(db,null,'bujo','bujo','Text','Cancel'));
+    task_value.state.push(new dao_data(db,null,null,'bujo','bujo','Text','To Do'));
+    task_value.state.push(new dao_data(db,null,null,'bujo','bujo','Text','Planned'));
+    task_value.state.push(new dao_data(db,null,null,'bujo','bujo','Text','Postponed'));
+    task_value.state.push(new dao_data(db,null,null,'bujo','bujo','Text','Done'));
+    task_value.state.push(new dao_data(db,null,null,'bujo','bujo','Text','Cancel'));
 
     task_value.important = 'Boolean';
 
 
-    var task = new dao_data(db,null,null,null,'Model',task_value))
+    var task = new dao_data(db,null,null,'bujo','bujo','Model',task_value);
 
     // Évènements
 
