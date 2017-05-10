@@ -6,6 +6,6 @@
         }
     },
     "plugins":[
-        
+        "./plugins/bulletjournal.js"
     ]
 }
