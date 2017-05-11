@@ -106,10 +106,7 @@ DAO_TOPIC.prototype.update = function(callback,stmt,finalize){
         finalize = true;
     }
     if (!this.id) {
-        this.create_dao(this,callback,stmt);
-        if (finalize) {
-            stmt.exec(callback);
-        }
+        this.create_dao(this,callback);
     } else {
         self = this;
         self.title_avaible(self.log,self.title,function(err,args){

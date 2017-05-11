@@ -76,6 +76,7 @@ DAO_LOG.prototype.create_dao = function(dao,callback,stmt,finalize){
     }
     dao.title_avaible(dao.owner,dao.title,function(err,args){
         if (!err) {
+
             stmt.insert({
                 table:'Logs',
                 keys:null,
@@ -110,10 +111,7 @@ DAO_LOG.prototype.update = function(callback,stmt,finalize){
         finalize = true;
     }
     if (!this.id) {
-        this.create_dao(this,callback,stmt);
-        if (finalize) {
-            stmt.exec(callback);
-        }
+        this.create_dao(this,callback);
     } else {
         self = this;
         self.title_avaible(self.owner,self.title,function(err,args){
