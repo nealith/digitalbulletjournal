@@ -21,7 +21,7 @@ function DAO_DATA(db,id,callback,topic,user,type,value,model){
                 if (self.type == 'Compound') {
                     self.model = args.model;
                 }
-                callback(err,seft);
+                callback(err,self);
             } else {
                 callback(err,null);
             }
@@ -223,7 +223,70 @@ DAO_DATA.prototype.update = function (callback,stmt,finalize) {
             }
         },stmt);
     } else {
-        self._update(callback,stmt,finalize,true);
+        var dao;
+        this.get(self.id,function(err,args){
+
+            if (!err) {
+                dao = args;
+                if (dao.type != self.type) {
+                    stmt.delete({
+                        table:'Data'+dao.type+'s',
+                        keys:{
+                            id:dao.id
+                        },
+                        values:null
+                    });
+                    stmt.update({
+                        table:'Data',
+                        keys:{
+                            id:self.id
+                        },
+                        values:{
+                            user:self.user,
+                            type:self.type
+                        }
+                    });
+                    if (self.type=='Compound') {
+                        stmt.insert({
+                            table:'Data'+self.type+'s',
+                            keys:null,
+                            values:{
+                                id:self.id,
+                                model:self.model
+                            }
+                        });
+                        self._update(callback,stmt,finalize,false);
+                    } else if (self.type=='Model') {
+                        stmt.insert({
+                            table:'Data'+self.type+'s',
+                            keys:null,
+                            values:{
+                                id:self.id,
+                            }
+                        });
+                        self._update(callback,stmt,finalize,false);
+                    } else {
+                        stmt.insert({
+                            table:'Data'+self.type+'s',
+                            keys:null,
+                            values:{
+                                id:self.id,
+                                value:self.value
+                            }
+                        });
+                        if (finalize) {
+                            stmt.exec(callback,self);
+                        } else {
+                            callback(null,self);
+                        }
+                    }
+
+                }
+            } else {
+                callback(err,args);
+            }
+        })
+
     }
 
 
@@ -695,7 +758,7 @@ DAO_DATA.prototype.get = function (id,callback) {
                         values:null
                     },function(err,args){
                         if (args) {
-                            dao.value = args[0].value
+                            dao.value = args[0].value;
                             callback(null,dao);
                         } else {
                             callback(err,null)

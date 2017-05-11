@@ -95,6 +95,16 @@ io.on('connection', function (socket) {
         })
     })
 
+	socket.on('update_log', (arg) => {
+        var dao_log = new DT.DAO_LOG(DT.DB,arg.id,function(err,args){
+			dao_log.title = arg.title
+			dao_log.privacy = arg.privacy
+			dao_log.update(function(err,args){
+	            socket.emit('create_log', err)
+	        })
+		});
+    })
+
     socket.on('delete_log', (arg) => {
         var dao_log = new DT.DAO_LOG(DT.DB,arg,function(err,args){
 			if (!err && args) {
@@ -124,6 +134,15 @@ io.on('connection', function (socket) {
         dao_topic.update(function(err,args){
             socket.emit('create_topic', err)
         })
+    })
+
+	socket.on('update_topic', (arg) => {
+        var dao_topic = new DT.DAO_TOPIC(DT.DB,arg.id,function(err,args){
+			dao_topic.title = arg.title
+			dao_topic.update(function(err,args){
+	            socket.emit('create_topic', err)
+	        })
+		});
     })
 
     socket.on('delete_topic', (arg) => {
@@ -208,9 +227,21 @@ io.on('connection', function (socket) {
     })
 
 	socket.on('create_data', (arg) => {
-        var dao_data = new DT.DAO_DATA(DT.DB,null,null,user.id,arg.title);
+        var dao_data = new DT.DAO_DATA(DT.DB);
 		var dao = dao_data.regen(arg);
+
         dao.update(function(err,args){
+			console.log(err);
+            socket.emit('create_data', err)
+        })
+    })
+
+	socket.on('update_data', (arg) => {
+		var dao_data = new DT.DAO_DATA(DT.DB);
+		var dao = dao_data.regen(arg);
+		console.log(dao);
+        dao.update(function(err,args){
+			console.log(err);
             socket.emit('create_data', err)
         })
     })
