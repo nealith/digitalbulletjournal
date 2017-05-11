@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Demo</title>
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="./photon/css/photon.min.css">
+    <link rel="stylesheet" href="./style.css">
+
+    <!-- Javascript -->
+    <script src="./socket.io-client/dist/socket.io.js"></script>
+
+  </head>
+  <body>
+      <!-- Wrap your entire app inside .window -->
+      <div class="window">
+        <!-- .toolbar-header sits at the top of your app -->
+        <header class="toolbar toolbar-header">
+            <div class="toolbar-actions">
+
+                <span class="icon icon-book"></span>
+                <div class="btn-group">
+
+                  <button id="log_add" class="btn btn-default">
+                    <span class="icon icon-plus"></span>
+                  </button>
+                  <button id="log_delete" class="btn btn-default">
+                    <span class="icon icon-cancel"></span>
+                  </button>
+                </div>
+
+                <span class="icon icon-docs"></span>
+                <div class="btn-group">
+
+                  <button id="topic_add" class="btn btn-default">
+                    <span class="icon icon-plus"></span>
+                  </button>
+                  <button id="topic_delete" class="btn btn-default">
+                    <span class="icon icon-cancel"></span>
+                  </button>
+                </div>
+
+                <span class="icon icon-pencil"></span>
+                <div class="btn-group">
+                  <button id="data_add" class="btn btn-default">
+                    <span class="icon icon-plus"></span>
+                  </button>
+                  <button id="data_delete" class="btn btn-default">
+                    <span class="icon icon-cancel"></span>
+                  </button>
+                </div>
+            </div>
+
+        </header>
+
+        <!-- Your app's content goes inside .window-content -->
+        <div id="content" class="window-content show">
+            <div class="pane-group">
+              <div class="pane">
+                  <ul class="list-group" id="list_logs">
+                      <li class="list-group-header">
+                          <h2>Logs</h2>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="media-body">
+                          <strong>Log_name</strong>
+                        </div>
+                      </li>
+                    </ul>
+              </div>
+              <div class="pane">
+                  <ul class="list-group" id="list_topics">
+                      <li class="list-group-header">
+                          <h2>Topics</h2>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="media-body">
+                          <strong>Topic_name</strong>
+                        </div>
+                      </li>
+                    </ul>
+              </div>
+
+              <div class="pane">
+                  <ul class="list-group" id="list_data">
+                      <li class="list-group-header">
+                          <h2>Entrees</h2>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="media-body">
+                          <strong>Entree</strong>
+                          <p>Date</p>
+                        </div>
+                      </li>
+                    </ul>
+              </div>
+            </div>
+        </div>
+      </div>
+
+      <div id="dialog" class="window-content hide">
+      </div>
+      <script src="./jquery-3.2.1.min.js" charset="utf-8"></script>
+
+      <script src="./index.js" charset="utf-8"></script>
+  </body>
+</html>
