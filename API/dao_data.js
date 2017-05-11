@@ -313,7 +313,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
         this.db.select({
             table:'Models_Data',
             keys:{
-                parent:this.id
+                parent:dao.id
             },
             values:null
         },function(err,args){
@@ -364,11 +364,42 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
 
                 var recursif_callback_update = function(err,args){
                     if (!err) {
-                        label = labels[m];
+
+
+
+
+
+
+                        // 4 - for value (sub-object) n in label m, look if his id exist in relation were parent if object and label is the current label m
+
+                        var is_in = false;
+                        for (var k = 0; (k < ids.length && !is_in); k++) {
+                            if(ids[k] == dao.value[label][n].id){
+                                is_in = true;
+                                ids[k] == null;
+                            }
+                        }
+
+                        // 4 bis - if does't exist, add a relation
+
+                        if (!is_in) {
+                            stmt.insert({
+                                table:'Models_Data',
+                                keys:null,
+                                values:{
+                                    parent:dao.id,
+                                    label:label,
+                                    data:dao.value[label][n].id
+                                }
+                            });
+                        }
+
+                        n++;
 
                         // 3 - for the label m
 
-                        if (n = labels[m].length) {
+                        if (n == dao.value[label].length) {
+                            console.log('finish label');
                             // At the end of update of all values for a label, look for relation (in database) to remove (cause don't still exist in new version of the model)
 
                             for (var i = 0; i < ids.length; i++) {
@@ -410,32 +441,6 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
 
                         }
 
-                        // 4 - for value (sub-object) n in label m, look if his id exist in relation were parent if object and label is the current label m
-
-                        var is_in = false;
-                        for (var k = 0; (k < ids.length && !is_in); k++) {
-                            if(ids[k] == dao.value[label][n].id){
-                                is_in = true;
-                                ids[k] == null;
-                            }
-                        }
-
-                        // 4 bis - if does't exist, add a relation
-
-                        if (!is_in) {
-                            stmt.insert({
-                                table:'Models_Data',
-                                keys:null,
-                                values:{
-                                    parent:dao.id,
-                                    label:label,
-                                    data:dao.value[label][n].id
-                                }
-                            });
-                        }
-
-                        n++;
-
                         // 5 - go the next value in label m
                         dao.value[label][n].update(recursif_callback_update,stmt,false);
 
@@ -444,6 +449,7 @@ DAO_DATA.prototype._update = function (callback,stmt,finalize,update){
                     }
                 }
                 // Do the first call to recursive function
+
                 if (labels.length > 0) {
                     label = labels[m];
                     dao.value[label][n].update(recursif_callback_update,stmt,false);
@@ -722,6 +728,62 @@ DAO_DATA.prototype.get_all = function (topic,type,callback) {
             },callback);
         }
     }
+}
+
+DAO_DATA.prototype.get_all_first_level = function (topic,type,callback) {
+    var self = this;
+    this.get_all(topic,type,function(err,args){
+        if (!err) {
+            var data = args;
+            self.db.select_all({
+                table:'Compounds_Data',
+                keys:null,
+                values:null
+            },function(err,args){
+                if (!err) {
+                    var compounds_data = args
+                    self.db.select_all({
+                        table:'Models_Data',
+                        keys:null,
+                        values:null
+                    },function(err,args){
+                        if (!err) {
+                            var models_data = args
+                            var data_data = new Array();
+                            data_data = data_data.concat(compounds_data);
+                            data_data = data_data.concat(models_data)
+                            var ret = new Array();
+                            for (var i = 0; i < data.length; i++) {
+                                var is_sub_data = false;
+                                for (var k = 0; (k < data_data.length && !is_sub_data); k++) {
+                                    var is_in = false;
+                                    for (var j = 0; (j < data.length && !is_in); j++) {
+                                        is_in = (data[j].id == data_data[k].parent)
+                                    }
+                                    if (is_in) {
+                                        is_sub_data = (data_data[k].data == data[i].id);
+                                    }
+                                }
+                                if (!is_sub_data) {
+                                    ret.push(data[i]);
+                                }
+
+                            }
+
+                            callback(null,ret);
+
+                        } else {
+                            callback(err,args);
+                        }
+                    });
+                } else {
+                    callback(err,args);
+                }
+            });
+        } else {
+            callback(err,args);
+        }
+    })
 }
 
 module.exports = DAO_DATA;
