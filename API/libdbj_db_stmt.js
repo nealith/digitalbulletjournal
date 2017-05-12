@@ -12,7 +12,6 @@ var DB_TRANSACTION_STATEMENT = function(db,utils,transaction){
 
 DB_TRANSACTION_STATEMENT.prototype.insert = function (args) {
     if (!this.lock) {
-
         var query = this.utils.insert(args);
         var sql = this.utils.to_sql(query);
         this.sql += sql;

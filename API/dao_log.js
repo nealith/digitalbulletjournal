@@ -11,7 +11,7 @@ var DAO_LOG = function(db,id,callback,owner,privacy,title){
                 self.owner = args.owner;
                 self.title = args.title;
                 self.creation_date = args.creation_date;
-                callback(err,seft);
+                callback(err,self);
             } else {
                 callback(err,null);
             }
@@ -50,7 +50,7 @@ DAO_LOG.prototype.title_avaible = function(owner,title,callback){
         if (!err) {
             var find = false;
             for (var i = 0; (i < args.length && !find); i++) {
-                if (args[i].title = title) {
+                if (args[i].title == title) {
                     find = true;
                 }
             }

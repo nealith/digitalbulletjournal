@@ -10,7 +10,7 @@ var DAO_TOPIC = function(db,id,callback,log,title){
                 self.log = args.log;
                 self.title = args.title;
                 self.creation_date = args.creation_date;
-                callback(err,seft);
+                callback(err,self);
             } else {
                 callback(err,null);
             }
@@ -42,7 +42,7 @@ DAO_TOPIC.prototype.title_avaible = function(log,title,callback){
         if (!err) {
             var find = false;
             for (var i = 0; (i < args.length && !find); i++) {
-                if (args[i].title = title) {
+                if (args[i].title == title) {
                     find = true;
                 }
             }
@@ -186,14 +186,30 @@ DAO_TOPIC.prototype.delete = function(callback,stmt,finalize){
     dao_data.get_all(self.id,null,function(err,args){
         if (!err) {
             all_data = args;
-            // Launch call on recursive_callback_delete_data
-            dao_data.get(all_data[m].id,function(err,args){
-                if (!err) {
-                    args.delete(recursive_callback_delete_data,stmt,false);
+            if (all_data.length > 0) {
+                // Launch call on recursive_callback_delete_data
+                dao_data.get(all_data[m].id,function(err,args){
+                    if (!err) {
+                        args.delete(recursive_callback_delete_data,stmt,false);
+                    } else {
+                        callback(err,args);
+                    }
+                });
+            } else {
+                stmt.delete({
+                    table:'Topics',
+                    keys:{
+                        id:self.id
+                    },
+                    values:null
+                });
+                if (finalize) {
+                    stmt.exec(callback);
                 } else {
-                    callback(err,args);
+                    callback(null,null);
                 }
-            });
+            }
+
         } else {
             callback(err,args);
         }
